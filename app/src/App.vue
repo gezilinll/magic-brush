@@ -1,12 +1,13 @@
 <template>
-    <div id="app">
-        <canvas
-            ref="canvas"
-            @mousedown="startDrawing"
-            @mousemove="drawing"
-            @mouseup="stopDrawing"
-        ></canvas>
-        <div class="buttons">
+    <div
+        id="app"
+        ref="container"
+        style="position: absolute"
+        @mousedown="startDrawing"
+        @mousemove="drawing"
+        @mouseup="stopDrawing"
+    >
+        <div class="buttons" style="position: absolute">
             <button
                 v-for="(btn, index) in buttons"
                 :key="index"
@@ -20,8 +21,10 @@
 
 <script setup lang="ts">
 import { BrushPotions, FreehandBrush } from 'magic-freehand';
+import { Point } from 'magic-freehand/src/common/point';
 import { onMounted, Ref, ref, watch } from 'vue';
 
+const initPoint: Point = { x: 0, y: 0 };
 let brush: FreehandBrush | null = null;
 const options: BrushPotions = { type: 'color', color: '#666666', width: 16 };
 const buttons = [
@@ -33,19 +36,25 @@ const buttons = [
     { img: 'image6.png' },
 ];
 const selectedButtonIndex = ref(0);
-const canvas: Ref<HTMLCanvasElement | null> = ref(null);
+const container: Ref<HTMLDivElement | null> = ref(null);
 
 function startDrawing(event: MouseEvent) {
     brush = new FreehandBrush(options);
+    initPoint.x = event.offsetX;
+    initPoint.y = event.offsetY;
     brush.addPoint({ x: event.offsetX, y: event.offsetY });
+    container.value!.appendChild(brush.canvas);
 }
 
 function drawing(event: MouseEvent) {
     if (!brush) {
         return;
     }
-    brush.addPoint({ x: event.offsetX, y: event.offsetY });
-    brush.draw(canvas.value!);
+    brush.addPoint({ x: event.offsetX - initPoint.x, y: event.offsetY - initPoint.y });
+    const result = brush.canvas;
+    result.style.left = `${brush.left}px`;
+    result.style.top = `${brush.top}px`;
+    brush.draw();
 }
 
 function stopDrawing() {
@@ -67,10 +76,7 @@ watch(
     { immediate: true }
 );
 
-onMounted(() => {
-    canvas.value!.width = window.innerWidth;
-    canvas.value!.height = window.innerHeight;
-});
+onMounted(() => {});
 </script>
 
 <style>
@@ -80,13 +86,7 @@ onMounted(() => {
     overflow: hidden;
     height: 100vh;
     width: 100vw;
-    position: relative;
-}
-
-canvas {
-    width: 100%;
-    height: 100%;
-    display: block;
+    position: absolute;
 }
 
 .buttons {

@@ -24,6 +24,7 @@
     "keywords": [],
     "author": "",
     "license": "ISC",
-    "dependencies": {},
-    "devDependencies": {}
+    "dependencies": {
+        "perfect-freehand": "^1.2.2"
+    }
 }
