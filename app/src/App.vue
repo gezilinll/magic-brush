@@ -23,7 +23,7 @@ import { BrushPotions, FreehandBrush } from 'magic-freehand';
 import { onMounted, Ref, ref, watch } from 'vue';
 
 let brush: FreehandBrush | null = null;
-const options: BrushPotions = { type: 'color', color: '#666666', width: 10 };
+const options: BrushPotions = { type: 'color', color: '#666666', width: 16 };
 const buttons = [
     { img: 'image1.png' },
     { img: 'image2.png' },
