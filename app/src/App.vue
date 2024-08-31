@@ -19,10 +19,11 @@
 </template>
 
 <script setup lang="ts">
-import { FreehandBrush } from 'magic-freehand';
-import { onMounted, Ref, ref } from 'vue';
+import { BrushPotions, FreehandBrush } from 'magic-freehand';
+import { onMounted, Ref, ref, watch } from 'vue';
 
 let brush: FreehandBrush | null = null;
+const options: BrushPotions = { type: 'color', color: '#666666', width: 10 };
 const buttons = [
     { img: 'image1.png' },
     { img: 'image2.png' },
@@ -35,7 +36,7 @@ const selectedButtonIndex = ref(0);
 const canvas: Ref<HTMLCanvasElement | null> = ref(null);
 
 function startDrawing(event: MouseEvent) {
-    brush = new FreehandBrush();
+    brush = new FreehandBrush(options);
     brush.addPoint({ x: event.offsetX, y: event.offsetY });
 }
 
@@ -50,6 +51,21 @@ function drawing(event: MouseEvent) {
 function stopDrawing() {
     brush = null;
 }
+
+watch(
+    () => selectedButtonIndex.value,
+    () => {
+        if (selectedButtonIndex.value === 0) {
+            const img = new Image();
+            img.src = buttons[selectedButtonIndex.value].img;
+            img.onload = () => {
+                options.type = 'image';
+                options.image = img;
+            };
+        }
+    },
+    { immediate: true }
+);
 
 onMounted(() => {
     canvas.value!.width = window.innerWidth;
