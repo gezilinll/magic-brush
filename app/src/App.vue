@@ -26,7 +26,7 @@ import { onMounted, Ref, ref, watch } from 'vue';
 
 const initPoint: Point = { x: 0, y: 0 };
 let brush: FreehandBrush | null = null;
-const options: BrushPotions = { type: 'color', color: '#666666', width: 16 };
+const options: BrushPotions = { type: 'color', color: '#666666', width: 8 };
 const buttons = [
     { img: 'image1.png' },
     { img: 'image2.png' },

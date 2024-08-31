@@ -24,7 +24,7 @@ export class FreehandBrush {
         this._options = options || {
             type: 'color',
             color: '#666666',
-            width: 10,
+            width: 8,
         };
         this._canvas = document.createElement('canvas');
         this._canvas.style.position = 'absolute';
@@ -66,6 +66,9 @@ export class FreehandBrush {
             streamline: 0.5,
             smoothing: 1.0,
             simulatePressure: true,
+            easing: (t) => {
+                return t * 5;
+            },
             start: {
                 taper: 1,
             },
@@ -73,10 +76,15 @@ export class FreehandBrush {
                 taper: 1,
             },
         });
+        const dpr = Math.max(2, window.devicePixelRatio);
         const context = this._canvas.getContext('2d')!;
         context.clearRect(0, 0, this._canvas.width, this._canvas.height);
-        this._canvas.width = this._maxOffsetRight - this._minOffsetLeft + this._options.width * 2;
-        this._canvas.height = this._maxOffsetBottom - this._minOffsetTop + this._options.width * 2;
+        const width = this._maxOffsetRight - this._minOffsetLeft + this._options.width * 2;
+        const height = this._maxOffsetBottom - this._minOffsetTop + this._options.width * 2;
+        this._canvas.width = width * dpr;
+        this._canvas.height = height * dpr;
+        this._canvas.style.width = `${width}px`;
+        this._canvas.style.height = `${height}px`;
 
         context.save();
         this._initBrushPaint(context);
@@ -84,6 +92,7 @@ export class FreehandBrush {
         const p2 = points[1];
         let lastPoint = points[2];
         context.beginPath();
+        context.scale(dpr, dpr);
         context.translate(
             -this._minOffsetLeft + this._options.width,
             -this._minOffsetTop + this._options.width
@@ -105,7 +114,6 @@ export class FreehandBrush {
     }
 
     private _initBrushPaint(context: CanvasRenderingContext2D) {
-        context.lineWidth = this._options.width;
         context.lineJoin = context.lineCap = 'round';
         if (this._options.type === 'color') {
             context.fillStyle = this._options.color!;
