@@ -10,62 +10,51 @@
             <button
                 v-for="(btn, index) in buttons"
                 :key="index"
-                :class="{ active: selectedButton === index }"
-                @click="selectButton(index)"
+                :class="{ active: selectedButtonIndex === index }"
+                @click="selectedButtonIndex = index"
                 :style="{ backgroundImage: `url(${btn.img})` }"
             ></button>
         </div>
     </div>
 </template>
 
-<script>
-export default {
-    data() {
-        return {
-            isDrawing: false,
-            context: null,
-            lastX: 0,
-            lastY: 0,
-            selectedButton: null,
-            buttons: [
-                { img: 'image1.png' },
-                { img: 'image2.png' },
-                { img: 'image3.png' },
-                { img: 'image4.png' },
-                { img: 'image5.png' },
-                { img: 'image6.png' },
-            ],
-        };
-    },
-    mounted() {
-        const canvas = this.$refs.canvas;
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        this.context = canvas.getContext('2d');
-    },
-    methods: {
-        startDrawing(event) {
-            this.isDrawing = true;
-            this.lastX = event.offsetX;
-            this.lastY = event.offsetY;
-        },
-        drawing(event) {
-            if (!this.isDrawing) return;
-            this.context.beginPath();
-            this.context.moveTo(this.lastX, this.lastY);
-            this.context.lineTo(event.offsetX, event.offsetY);
-            this.context.stroke();
-            this.lastX = event.offsetX;
-            this.lastY = event.offsetY;
-        },
-        stopDrawing() {
-            this.isDrawing = false;
-        },
-        selectButton(index) {
-            this.selectedButton = index;
-        },
-    },
-};
+<script setup lang="ts">
+import { FreehandBrush } from 'magic-freehand';
+import { onMounted, Ref, ref } from 'vue';
+
+let brush: FreehandBrush | null = null;
+const buttons = [
+    { img: 'image1.png' },
+    { img: 'image2.png' },
+    { img: 'image3.png' },
+    { img: 'image4.png' },
+    { img: 'image5.png' },
+    { img: 'image6.png' },
+];
+const selectedButtonIndex = ref(0);
+const canvas: Ref<HTMLCanvasElement | null> = ref(null);
+
+function startDrawing(event: MouseEvent) {
+    brush = new FreehandBrush();
+    brush.addPoint({ x: event.offsetX, y: event.offsetY });
+}
+
+function drawing(event: MouseEvent) {
+    if (!brush) {
+        return;
+    }
+    brush.addPoint({ x: event.offsetX, y: event.offsetY });
+    brush.draw(canvas.value!);
+}
+
+function stopDrawing() {
+    brush = null;
+}
+
+onMounted(() => {
+    canvas.value!.width = window.innerWidth;
+    canvas.value!.height = window.innerHeight;
+});
 </script>
 
 <style>
