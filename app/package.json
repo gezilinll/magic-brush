@@ -1,0 +1,17 @@
+{
+    "name": "editor",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+        "dev": "vite",
+        "clean": "rm -rf dist",
+        "build": "pnpm clean & vite build"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "magic-freehand": "workspace:*"
+    },
+    "devDependencies": {}
+}
