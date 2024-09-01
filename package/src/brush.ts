@@ -1,4 +1,5 @@
 import getStroke from 'perfect-freehand';
+import simplify from 'simplify-js';
 
 import { Point } from './common/point';
 import { Rect } from './common/rect';
@@ -53,7 +54,8 @@ export class FreehandBrush {
     }
 
     draw(): HTMLCanvasElement | null {
-        const points = getStroke(this._points, {
+        const simplifyPoints = simplify(this._points, 0.1);
+        const points = getStroke(simplifyPoints, {
             size: this._options.width,
             thinning: 0.5,
             streamline: 0.5,
