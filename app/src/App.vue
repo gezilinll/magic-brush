@@ -43,12 +43,13 @@
 
 <script setup lang="ts">
 import { BrushPotions, FreehandBrush } from 'magic-freehand';
-import { Point } from 'magic-freehand';
-import { onMounted, Ref, ref, watch } from 'vue';
+import { Ref, ref, watch } from 'vue';
 
+declare type BrushElement = { brush: FreehandBrush; initLeft: number; initTop: number };
+
+const elements: BrushElement[] = [];
+let currentElement: BrushElement | null = null;
 const isDrawing = ref(false);
-const initPoint: Point = { x: 0, y: 0 };
-let brush: FreehandBrush | null = null;
 const options: BrushPotions = { type: 'color', color: '#000000', width: 16 };
 const buttons = [
     { img: 'image1.png' },
@@ -68,26 +69,32 @@ function startDrawing(event: MouseEvent) {
         return;
     }
     isDrawing.value = true;
-    brush = new FreehandBrush(options);
-    initPoint.x = event.offsetX;
-    initPoint.y = event.offsetY;
-    brush.canvas.style.position = 'absolute';
-    container.value!.appendChild(brush.canvas);
+    currentElement = {
+        brush: new FreehandBrush(options),
+        initLeft: event.offsetX,
+        initTop: event.offsetY,
+    };
+    elements.push(currentElement);
+    currentElement.brush.canvas.style.position = 'absolute';
+    container.value!.appendChild(currentElement.brush.canvas);
 }
 
 async function drawing(event: MouseEvent) {
-    if (!brush) {
+    if (!isDrawing.value) {
         return;
     }
-    brush.addPoint({ x: event.offsetX - initPoint.x, y: event.offsetY - initPoint.y });
-    const result = brush.canvas;
-    result.style.left = `${initPoint.x + brush.left}px`;
-    result.style.top = `${initPoint.y + brush.top}px`;
-    await brush.draw();
+    currentElement!.brush.addPoint({
+        x: event.offsetX - currentElement!.initLeft,
+        y: event.offsetY - currentElement!.initTop,
+    });
+    const result = currentElement!.brush.canvas;
+    result.style.left = `${currentElement!.initLeft + currentElement!.brush.left}px`;
+    result.style.top = `${currentElement!.initTop + currentElement!.brush.top}px`;
+    await currentElement!.brush.draw();
 }
 
 function stopDrawing() {
-    brush = null;
+    currentElement = null;
     isDrawing.value = false;
 }
 
@@ -106,7 +113,7 @@ watch(
     { immediate: true }
 );
 
-onMounted(() => {});
+function refreshElements() {}
 </script>
 
 <style>
