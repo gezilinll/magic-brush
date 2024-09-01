@@ -25,6 +25,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "canvg": "^4.0.2",
         "perfect-freehand": "^1.2.2"
     }
 }

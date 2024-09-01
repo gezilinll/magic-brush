@@ -19,12 +19,13 @@ export class FreehandBrush {
     private _maxOffsetBottom: number = Number.MIN_VALUE;
     private _left: number = Number.NaN;
     private _top: number = Number.NaN;
+    private _count: number = 0;
 
     constructor(options?: BrushPotions) {
         this._options = options || {
             type: 'color',
             color: '#666666',
-            width: 8,
+            width: 4,
         };
         this._canvas = document.createElement('canvas');
         this._canvas.style.position = 'absolute';
@@ -57,24 +58,12 @@ export class FreehandBrush {
     }
 
     draw(): HTMLCanvasElement | null {
-        if (this._points.length < 4) {
-            return null;
-        }
         const points = getStroke(this._points, {
             size: this._options.width,
             thinning: 0.5,
             streamline: 0.5,
-            smoothing: 1.0,
+            smoothing: 0.5,
             simulatePressure: true,
-            easing: (t) => {
-                return t * 5;
-            },
-            start: {
-                taper: 1,
-            },
-            end: {
-                taper: 1,
-            },
         });
         const dpr = Math.max(2, window.devicePixelRatio);
         const context = this._canvas.getContext('2d')!;
@@ -88,27 +77,26 @@ export class FreehandBrush {
 
         context.save();
         this._initBrushPaint(context);
-        const p1 = points[0];
-        const p2 = points[1];
-        let lastPoint = points[2];
-        context.beginPath();
         context.scale(dpr, dpr);
         context.translate(
             -this._minOffsetLeft + this._options.width,
             -this._minOffsetTop + this._options.width
         );
-        context.moveTo(p1[0], p1[1]);
-        context.quadraticCurveTo(p2[0], p2[1], lastPoint[0], lastPoint[1]);
+        context.beginPath();
+        context.moveTo(points[0][0], points[0][1]);
         const length = points.length;
-        for (let index = 3; index < length; index++) {
-            const currentPoint = points[index];
-            const midPoint = this._midPointBtw(
-                { x: lastPoint[0], y: lastPoint[1] },
-                { x: currentPoint[0], y: currentPoint[1] }
-            );
-            context.quadraticCurveTo(midPoint.x, midPoint.y, currentPoint[0], currentPoint[1]);
-            lastPoint = currentPoint;
+        let p1 = { x: points[0][0], y: points[0][1] };
+        let p2 = { x: points[1][0], y: points[1][1] };
+        for (let index = 1; index < length; index++) {
+            const midPoint = this._midPointBtw(p1, p2);
+            context.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
+            if (index === length - 1) {
+                break;
+            }
+            p1 = { x: points[index][0], y: points[index][1] };
+            p2 = { x: points[index + 1][0], y: points[index + 1][1] };
         }
+        context.closePath();
         context.fill();
         return this._canvas;
     }
