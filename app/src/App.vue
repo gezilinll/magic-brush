@@ -71,7 +71,7 @@ function startDrawing(event: MouseEvent) {
     brush = new FreehandBrush(options);
     initPoint.x = event.offsetX;
     initPoint.y = event.offsetY;
-    brush.addPoint({ x: event.offsetX, y: event.offsetY });
+    brush.canvas.style.position = 'absolute';
     container.value!.appendChild(brush.canvas);
 }
 
@@ -81,8 +81,8 @@ async function drawing(event: MouseEvent) {
     }
     brush.addPoint({ x: event.offsetX - initPoint.x, y: event.offsetY - initPoint.y });
     const result = brush.canvas;
-    result.style.left = `${brush.left}px`;
-    result.style.top = `${brush.top}px`;
+    result.style.left = `${initPoint.x + brush.left}px`;
+    result.style.top = `${initPoint.y + brush.top}px`;
     await brush.draw();
 }
 

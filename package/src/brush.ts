@@ -1,6 +1,7 @@
 import getStroke from 'perfect-freehand';
 
 import { Point } from './common/point';
+import { Rect } from './common/rect';
 
 export interface BrushPotions {
     type: 'color' | 'image';
@@ -13,13 +14,7 @@ export class FreehandBrush {
     private _points: Point[] = [];
     private _options: BrushPotions;
     private _canvas: HTMLCanvasElement;
-    private _minOffsetLeft: number = Number.MAX_VALUE;
-    private _maxOffsetRight: number = Number.MIN_VALUE;
-    private _minOffsetTop: number = Number.MAX_VALUE;
-    private _maxOffsetBottom: number = Number.MIN_VALUE;
-    private _left: number = Number.NaN;
-    private _top: number = Number.NaN;
-    private _count: number = 0;
+    private _rect: Rect;
 
     constructor(options?: BrushPotions) {
         this._options = options || {
@@ -28,29 +23,29 @@ export class FreehandBrush {
             width: 4,
         };
         this._canvas = document.createElement('canvas');
-        this._canvas.style.position = 'absolute';
         this._canvas.style.pointerEvents = 'none';
+        this._rect = new Rect(
+            Number.MAX_VALUE,
+            Number.MIN_VALUE,
+            Number.MAX_VALUE,
+            Number.MIN_VALUE
+        );
     }
 
     addPoint(p: Point) {
-        if (isNaN(this._left)) {
-            this._left = p.x;
-            this._top = p.y;
-            return;
-        }
-        this._minOffsetLeft = Math.min(this._minOffsetLeft, p.x);
-        this._maxOffsetRight = Math.max(this._maxOffsetRight, p.x);
-        this._minOffsetTop = Math.min(this._minOffsetTop, p.y);
-        this._maxOffsetBottom = Math.max(this._maxOffsetBottom, p.y);
+        this._rect.left = Math.min(this._rect.left, p.x - this._options.width / 2);
+        this._rect.right = Math.max(this._rect.right, p.x + this._options.width / 2);
+        this._rect.top = Math.min(this._rect.top, p.y - this._options.width / 2);
+        this._rect.bottom = Math.max(this._rect.bottom, p.y + this._options.width / 2);
         this._points.push(p);
     }
 
     get left() {
-        return this._left + this._minOffsetLeft;
+        return this._rect.left;
     }
 
     get top() {
-        return this._top + this._minOffsetTop;
+        return this._rect.top;
     }
 
     get canvas() {
@@ -68,8 +63,8 @@ export class FreehandBrush {
         const dpr = Math.max(2, window.devicePixelRatio);
         const context = this._canvas.getContext('2d')!;
         context.clearRect(0, 0, this._canvas.width, this._canvas.height);
-        const width = this._maxOffsetRight - this._minOffsetLeft + this._options.width * 2;
-        const height = this._maxOffsetBottom - this._minOffsetTop + this._options.width * 2;
+        const width = this._rect.width;
+        const height = this._rect.height;
         this._canvas.width = width * dpr;
         this._canvas.height = height * dpr;
         this._canvas.style.width = `${width}px`;
@@ -79,8 +74,8 @@ export class FreehandBrush {
         this._initBrushPaint(context);
         context.scale(dpr, dpr);
         context.translate(
-            -this._minOffsetLeft + this._options.width,
-            -this._minOffsetTop + this._options.width
+            this._rect.left < 0 ? -this._rect.left : 0,
+            this._rect.top < 0 ? -this._rect.top : 0
         );
         context.beginPath();
         context.moveTo(points[0][0], points[0][1]);
