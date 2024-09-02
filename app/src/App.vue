@@ -24,14 +24,114 @@
                 ></button>
             </div>
             <div class="adjustments">
-                <div class="size-control">
+                <div
+                    style="width: 90%; height: 1px; background-color: black; margin-top: 10px"
+                ></div>
+                <div class="adjustment-control">
+                    <label for="simplifyPoints">Simplify: </label>
+                    <input
+                        id="simplifyPoints"
+                        type="range"
+                        min="0.1"
+                        max="10"
+                        step="0.1"
+                        v-model.number="simplifyPoints"
+                    />
+                    <span>{{ simplifyPoints }}</span>
+                </div>
+                <div class="adjustment-control">
                     <label for="size">Size: </label>
-                    <input id="size" type="range" min="1" max="100" v-model="size" />
+                    <input id="size" type="range" min="1" max="30" v-model.number="size" />
                     <span>{{ size }}</span>
                 </div>
-                <div class="easing-control">
+                <div class="adjustment-control">
+                    <label for="thinning">Thinning: </label>
+                    <input
+                        id="thinning"
+                        type="range"
+                        min="-0.99"
+                        max="0.99"
+                        step="0.01"
+                        v-model.number="thinning"
+                    />
+                    <span>{{ thinning }}</span>
+                </div>
+                <div class="adjustment-control">
+                    <label for="streamline">Streamline: </label>
+                    <input
+                        id="streamline"
+                        type="range"
+                        min="0.01"
+                        max="1"
+                        step="0.01"
+                        v-model.number="streamline"
+                    />
+                    <span>{{ streamline }}</span>
+                </div>
+                <div class="adjustment-control">
+                    <label for="smoothing">Smoothing: </label>
+                    <input
+                        id="smoothing"
+                        type="range"
+                        min="0.01"
+                        max="0.99"
+                        step="0.01"
+                        v-model.number="smoothing"
+                    />
+                    <span>{{ smoothing }}</span>
+                </div>
+                <div class="adjustment-control">
                     <label for="easing">Easing: </label>
                     <select id="easing" v-model="easing">
+                        <option value="linear">Linear</option>
+                        <option value="easeInQuad">EaseInQuad</option>
+                    </select>
+                </div>
+                <div
+                    style="width: 90%; height: 1px; background-color: black; margin-top: 10px"
+                ></div>
+                <div class="adjustment-control">
+                    <label for="taperStart">Taper Start: </label>
+                    <input
+                        id="taperStart"
+                        type="range"
+                        min="0"
+                        max="100"
+                        v-model.number="taperStart"
+                    />
+                    <span>{{ taperStart < 100 ? taperStart : true }}</span>
+                </div>
+                <div class="adjustment-control" v-if="taperStart === 0">
+                    <label for="capStart">Cap Start: </label>
+                    <input
+                        type="checkbox"
+                        id="capStart"
+                        class="custom-checkbox"
+                        v-model="capStart"
+                    />
+                </div>
+                <div class="adjustment-control" v-if="taperStart !== 0">
+                    <label for="easingStart">Easing Start: </label>
+                    <select id="easingStart" v-model="easingStart">
+                        <option value="linear">Linear</option>
+                        <option value="easeInQuad">EaseInQuad</option>
+                    </select>
+                </div>
+                <div
+                    style="width: 90%; height: 1px; background-color: black; margin-top: 10px"
+                ></div>
+                <div class="adjustment-control">
+                    <label for="taperEnd">Taper End: </label>
+                    <input id="taperEnd" type="range" min="0" max="100" v-model.number="taperEnd" />
+                    <span>{{ taperEnd < 100 ? taperEnd : true }}</span>
+                </div>
+                <div class="adjustment-control" v-if="taperEnd === 0">
+                    <label for="capEnd">Cap End: </label>
+                    <input type="checkbox" id="capEnd" class="custom-checkbox" v-model="capEnd" />
+                </div>
+                <div class="adjustment-control" v-if="taperEnd !== 0">
+                    <label for="easingEnd">Easing Start: </label>
+                    <select id="easingEnd" v-model="easingEnd">
                         <option value="linear">Linear</option>
                         <option value="easeInQuad">EaseInQuad</option>
                     </select>
@@ -60,12 +160,22 @@ const buttons = [
     { img: 'image6.png' },
 ];
 const selectedButtonIndex = ref(0);
+const simplifyPoints = ref(1);
 const size = ref(10);
+const thinning = ref(0.7);
+const streamline = ref(0.5);
+const smoothing = ref(0.5);
 const easing = ref('linear');
+const taperStart = ref(0);
+const easingStart = ref('linear');
+const capStart = ref(false);
+const taperEnd = ref(0);
+const easingEnd = ref('linear');
+const capEnd = ref(false);
 const container: Ref<HTMLDivElement | null> = ref(null);
 
 function startDrawing(event: MouseEvent) {
-    if (event.offsetX < 270) {
+    if (event.offsetX < 300) {
         return;
     }
     isDrawing.value = true;
@@ -132,11 +242,11 @@ function refreshElements() {}
     left: 16px;
     display: flex;
     flex-wrap: wrap;
-    width: 245px;
+    width: 300px;
     height: 500px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
     background-color: white;
-    opacity: 0.8;
+    opacity: 0.7;
 }
 
 .buttons {
@@ -167,19 +277,20 @@ button.active {
     position: absolute;
     flex-direction: column;
     gap: 8px;
-    width: 212px;
-    margin-top: 200px;
+    width: 300px;
+    margin-left: 16px;
+    margin-top: 168px;
 }
 
-.size-control,
-.easing-control {
+.adjustment-control {
     display: flex;
     align-items: center;
+    padding-top: 8px;
+    margin-right: 32px;
 }
 
-.size-control label,
-.easing-control label {
-    margin-right: 8px;
+.adjustment-control label {
+    margin-right: 4px;
 }
 
 input[type='range'] {
@@ -189,5 +300,21 @@ input[type='range'] {
 
 select {
     flex: 1;
+}
+
+.custom-checkbox {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #007bff;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+}
+
+.custom-checkbox:checked {
+    background-color: #007bff;
+    border-color: #007bff;
 }
 </style>

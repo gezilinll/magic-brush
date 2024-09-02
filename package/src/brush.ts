@@ -76,9 +76,8 @@ export class FreehandBrush {
             strokePoints.map((item) => {
                 return { x: item[0], y: item[1] };
             }),
-            0.5
+            1
         );
-
         context.save();
         context.scale(dpr, dpr);
         context.translate(
