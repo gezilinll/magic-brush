@@ -219,10 +219,10 @@ const smoothing = ref(0.5);
 const easing = ref('linear');
 const taperStart = ref(0);
 const easingStart = ref('linear');
-const capStart = ref(false);
+const capStart = ref(true);
 const taperEnd = ref(0);
 const easingEnd = ref('linear');
-const capEnd = ref(false);
+const capEnd = ref(true);
 
 const container: Ref<HTMLDivElement | null> = ref(null);
 let options: BrushPotions = getOptions();
