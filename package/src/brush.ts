@@ -54,14 +54,6 @@ export class FreehandBrush {
     }
 
     draw(): HTMLCanvasElement | null {
-        const simplifyPoints = simplify(this._points, 0.1);
-        const points = getStroke(simplifyPoints, {
-            size: this._options.width,
-            thinning: 0.5,
-            streamline: 0.5,
-            smoothing: 0.5,
-            simulatePressure: true,
-        });
         const dpr = Math.max(2, window.devicePixelRatio);
         const context = this._canvas.getContext('2d')!;
         context.clearRect(0, 0, this._canvas.width, this._canvas.height);
@@ -71,30 +63,45 @@ export class FreehandBrush {
         this._canvas.height = height * dpr;
         this._canvas.style.width = `${width}px`;
         this._canvas.style.height = `${height}px`;
+        this._initBrushPaint(context);
+
+        const strokePoints = getStroke(this._points, {
+            size: this._options.width,
+            thinning: 0.5,
+            streamline: 0.5,
+            smoothing: 0.5,
+            simulatePressure: true,
+        });
+        const simplifyPoints = simplify(
+            strokePoints.map((item) => {
+                return { x: item[0], y: item[1] };
+            }),
+            0.5
+        );
 
         context.save();
-        this._initBrushPaint(context);
         context.scale(dpr, dpr);
         context.translate(
             this._rect.left < 0 ? -this._rect.left : 0,
             this._rect.top < 0 ? -this._rect.top : 0
         );
         context.beginPath();
-        context.moveTo(points[0][0], points[0][1]);
-        const length = points.length;
-        let p1 = { x: points[0][0], y: points[0][1] };
-        let p2 = { x: points[1][0], y: points[1][1] };
+        context.moveTo(simplifyPoints[0].x, simplifyPoints[0].y);
+        const length = simplifyPoints.length;
+        let p1 = { x: simplifyPoints[0].x, y: simplifyPoints[0].y };
+        let p2 = { x: simplifyPoints[1].x, y: simplifyPoints[1].y };
         for (let index = 1; index < length; index++) {
             const midPoint = this._midPointBtw(p1, p2);
             context.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
             if (index === length - 1) {
                 break;
             }
-            p1 = { x: points[index][0], y: points[index][1] };
-            p2 = { x: points[index + 1][0], y: points[index + 1][1] };
+            p1 = { x: simplifyPoints[index].x, y: simplifyPoints[index].y };
+            p2 = { x: simplifyPoints[index + 1].x, y: simplifyPoints[index + 1].y };
         }
         context.closePath();
         context.fill();
+
         return this._canvas;
     }
 
