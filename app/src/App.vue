@@ -20,7 +20,7 @@
                     :key="index"
                     :class="{ active: selectedButtonIndex === index }"
                     @click="selectedButtonIndex = index"
-                    :style="{ backgroundImage: `url(${btn.img})` }"
+                    :style="{ backgroundImage: `url(${btn.src})` }"
                 ></button>
             </div>
             <div class="adjustments">
@@ -41,7 +41,7 @@
                 </div>
                 <div class="adjustment-control">
                     <label for="size">Size: </label>
-                    <input id="size" type="range" min="1" max="30" v-model.number="size" />
+                    <input id="size" type="range" min="1" max="100" v-model.number="size" />
                     <span>{{ size }}</span>
                 </div>
                 <div class="adjustment-control">
@@ -143,26 +143,26 @@
 
 <script setup lang="ts">
 import { BrushPotions, FreehandBrush } from 'magic-freehand';
-import { Ref, ref, watch } from 'vue';
+import { onMounted, Ref, ref, watch } from 'vue';
 
 declare type BrushElement = { brush: FreehandBrush; initLeft: number; initTop: number };
 
 const elements: BrushElement[] = [];
 let currentElement: BrushElement | null = null;
+const isLoading = ref(true);
 const isDrawing = ref(false);
-const options: BrushPotions = { type: 'color', color: '#000000', width: 16 };
-const buttons = [
-    { img: 'image1.png' },
-    { img: 'image2.png' },
-    { img: 'image3.png' },
-    { img: 'image4.png' },
-    { img: 'image5.png' },
-    { img: 'image6.png' },
+const buttons: { src: string; img: CanvasImageSource | null }[] = [
+    { src: 'image1.png', img: null },
+    { src: 'image2.png', img: null },
+    { src: 'image3.png', img: null },
+    { src: 'image4.png', img: null },
+    { src: 'image5.png', img: null },
+    { src: 'image6.png', img: null },
 ];
 const selectedButtonIndex = ref(0);
-const simplifyPoints = ref(1);
-const size = ref(10);
-const thinning = ref(0.7);
+const simplifyPoints = ref(0.5);
+const size = ref(16);
+const thinning = ref(0.6);
 const streamline = ref(0.5);
 const smoothing = ref(0.5);
 const easing = ref('linear');
@@ -172,10 +172,33 @@ const capStart = ref(false);
 const taperEnd = ref(0);
 const easingEnd = ref('linear');
 const capEnd = ref(false);
+
 const container: Ref<HTMLDivElement | null> = ref(null);
+let options: BrushPotions = getOptions();
+
+function getFillOptions() {
+    const fillType = selectedButtonIndex.value === 0 ? 'image' : 'color';
+    const fillColor = '#000000';
+    const fillImage: CanvasImageSource | undefined =
+        selectedButtonIndex.value === 0 ? buttons[selectedButtonIndex.value].img! : undefined;
+    return { fillType, fillColor, fillImage };
+}
+
+function getOptions() {
+    const fillOptions = getFillOptions();
+    return {
+        fillType: fillOptions.fillType,
+        fillColor: fillOptions.fillColor,
+        fillImage: fillOptions.fillImage,
+        fillSize: size.value,
+        thinning: thinning.value,
+        smoothing: smoothing.value,
+        simplifyPoints: simplifyPoints.value,
+    } as BrushPotions;
+}
 
 function startDrawing(event: MouseEvent) {
-    if (event.offsetX < 300) {
+    if (event.offsetX < 300 || isLoading.value) {
         return;
     }
     isDrawing.value = true;
@@ -211,19 +234,64 @@ function stopDrawing() {
 watch(
     () => selectedButtonIndex.value,
     () => {
-        if (selectedButtonIndex.value === 0) {
-            const img = new Image();
-            img.src = buttons[selectedButtonIndex.value].img;
-            img.onload = () => {
-                options.type = 'image';
-                options.image = img;
-            };
-        }
+        options = getOptions();
     },
     { immediate: true }
 );
 
-function refreshElements() {}
+watch(
+    () => [
+        simplifyPoints.value,
+        size.value,
+        thinning.value,
+        streamline.value,
+        smoothing.value,
+        easing.value,
+        taperStart.value,
+        capStart.value,
+        easingStart.value,
+        taperEnd.value,
+        capEnd.value,
+        easingEnd.value,
+    ],
+    () => {
+        options = getOptions();
+        elements.forEach(async (element) => {
+            element.brush.updateOptions(options);
+            const result = element!.brush.canvas;
+            result.style.left = `${element!.initLeft + element!.brush.left}px`;
+            result.style.top = `${element!.initTop + element!.brush.top}px`;
+            await element!.brush.draw();
+        });
+    }
+);
+
+onMounted(async () => {
+    const loadImage = (src: string) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = src;
+
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+        });
+    };
+
+    const loadPromises = buttons.map(async (button) => {
+        try {
+            const result = await loadImage(button.src);
+            if (result) {
+                button.img = result as CanvasImageSource;
+            }
+        } catch (error) {
+            console.error(`Failed to load image: ${button.src}`);
+        }
+    });
+
+    await Promise.all(loadPromises);
+    options = getOptions();
+    isLoading.value = false;
+});
 </script>
 
 <style>

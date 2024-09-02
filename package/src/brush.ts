@@ -4,28 +4,56 @@ import simplify from 'simplify-js';
 import { Point } from './common/point';
 import { Rect } from './common/rect';
 
+export declare type FillType = 'color' | 'image';
+export declare type EasingType = 'linear' | 'easeInQuad';
+
 export interface BrushPotions {
-    type: 'color' | 'image';
-    width: number;
-    color?: string;
-    image?: CanvasImageSource;
+    simplifyPoints?: number;
+    thinning?: number;
+    smoothing?: number;
+    streamline?: number;
+
+    easing?: EasingType;
+    start?: {
+        cap?: boolean;
+        taper?: number | boolean;
+        easing?: EasingType;
+    };
+    end?: {
+        cap?: boolean;
+        taper?: number | boolean;
+        easing?: EasingType;
+    };
+
+    fillType: 'color' | 'image';
+    fillSize: number;
+    disableFill?: boolean;
+    fillColor?: string;
+    fillImage?: CanvasImageSource;
 }
 
 export class FreehandBrush {
     private _points: Point[] = [];
     private _options: BrushPotions;
     private _canvas: HTMLCanvasElement;
-    private _rect: Rect;
+    private _pointsBBox: Rect;
+    private _realBBox: Rect;
 
     constructor(options?: BrushPotions) {
         this._options = options || {
-            type: 'color',
-            color: '#666666',
-            width: 4,
+            fillType: 'color',
+            fillColor: '#666666',
+            fillSize: 4,
         };
         this._canvas = document.createElement('canvas');
         this._canvas.style.pointerEvents = 'none';
-        this._rect = new Rect(
+        this._pointsBBox = new Rect(
+            Number.MAX_VALUE,
+            Number.MIN_VALUE,
+            Number.MAX_VALUE,
+            Number.MIN_VALUE
+        );
+        this._realBBox = new Rect(
             Number.MAX_VALUE,
             Number.MIN_VALUE,
             Number.MAX_VALUE,
@@ -33,20 +61,29 @@ export class FreehandBrush {
         );
     }
 
+    updateOptions(options: Partial<BrushPotions>) {
+        Object.assign(this._options, options);
+        if (this._points.length > 0) {
+            this._updateRealBBox();
+        }
+    }
+
     addPoint(p: Point) {
-        this._rect.left = Math.min(this._rect.left, p.x - this._options.width / 2);
-        this._rect.right = Math.max(this._rect.right, p.x + this._options.width / 2);
-        this._rect.top = Math.min(this._rect.top, p.y - this._options.width / 2);
-        this._rect.bottom = Math.max(this._rect.bottom, p.y + this._options.width / 2);
+        this._pointsBBox.left = Math.min(this._pointsBBox.left, p.x);
+        this._pointsBBox.right = Math.max(this._pointsBBox.right, p.x);
+        this._pointsBBox.top = Math.min(this._pointsBBox.top, p.y);
+        this._pointsBBox.bottom = Math.max(this._pointsBBox.bottom, p.y);
         this._points.push(p);
+
+        this._updateRealBBox();
     }
 
     get left() {
-        return this._rect.left;
+        return this._realBBox.left;
     }
 
     get top() {
-        return this._rect.top;
+        return this._realBBox.top;
     }
 
     get canvas() {
@@ -57,8 +94,8 @@ export class FreehandBrush {
         const dpr = Math.max(2, window.devicePixelRatio);
         const context = this._canvas.getContext('2d')!;
         context.clearRect(0, 0, this._canvas.width, this._canvas.height);
-        const width = this._rect.width;
-        const height = this._rect.height;
+        const width = this._realBBox.width;
+        const height = this._realBBox.height;
         this._canvas.width = width * dpr;
         this._canvas.height = height * dpr;
         this._canvas.style.width = `${width}px`;
@@ -66,23 +103,23 @@ export class FreehandBrush {
         this._initBrushPaint(context);
 
         const strokePoints = getStroke(this._points, {
-            size: this._options.width,
-            thinning: 0.5,
-            streamline: 0.5,
-            smoothing: 0.5,
             simulatePressure: true,
+            size: this._options.fillSize,
+            thinning: this._options.thinning,
+            streamline: this._options.streamline,
+            smoothing: this._options.smoothing,
         });
         const simplifyPoints = simplify(
             strokePoints.map((item) => {
                 return { x: item[0], y: item[1] };
             }),
-            1
+            this._options.simplifyPoints || 0.1
         );
         context.save();
         context.scale(dpr, dpr);
         context.translate(
-            this._rect.left < 0 ? -this._rect.left : 0,
-            this._rect.top < 0 ? -this._rect.top : 0
+            this._realBBox.left < 0 ? -this._realBBox.left : 0,
+            this._realBBox.top < 0 ? -this._realBBox.top : 0
         );
         context.beginPath();
         context.moveTo(simplifyPoints[0].x, simplifyPoints[0].y);
@@ -100,16 +137,17 @@ export class FreehandBrush {
         }
         context.closePath();
         context.fill();
+        context.restore();
 
         return this._canvas;
     }
 
     private _initBrushPaint(context: CanvasRenderingContext2D) {
         context.lineJoin = context.lineCap = 'round';
-        if (this._options.type === 'color') {
-            context.fillStyle = this._options.color!;
-        } else if (this._options.type === 'image') {
-            context.fillStyle = context.createPattern(this._options.image!, 'repeat')!;
+        if (this._options.fillType === 'color') {
+            context.fillStyle = this._options.fillColor!;
+        } else if (this._options.fillType === 'image') {
+            context.fillStyle = context.createPattern(this._options.fillImage!, 'repeat')!;
         }
     }
 
@@ -118,5 +156,12 @@ export class FreehandBrush {
             x: p1.x + (p2.x - p1.x) / 2,
             y: p1.y + (p2.y - p1.y) / 2,
         };
+    }
+
+    private _updateRealBBox() {
+        this._realBBox.left = this._pointsBBox.left - this._options.fillSize / 2;
+        this._realBBox.right = this._pointsBBox.right + this._options.fillSize / 2;
+        this._realBBox.top = this._pointsBBox.top - this._options.fillSize / 2;
+        this._realBBox.bottom = this._pointsBBox.bottom + this._options.fillSize / 2;
     }
 }
