@@ -85,6 +85,23 @@
                     <select id="easing" v-model="easing">
                         <option value="linear">Linear</option>
                         <option value="easeInQuad">EaseInQuad</option>
+                        <option value="easeOutQuad">EaseOutQuad</option>
+                        <option value="easeInOutQuad">EaseInOutQuad</option>
+                        <option value="easeInCubic">EaseInCubic</option>
+                        <option value="easeOutCubic">EaseOutCubic</option>
+                        <option value="easeInOutCubic">EaseInOutCubic</option>
+                        <option value="easeInQuart">EaseInQuart</option>
+                        <option value="easeOutQuart">EaseOutQuart</option>
+                        <option value="easeInOutQuart">EaseInOutQuart</option>
+                        <option value="easeInQuint">EaseInQuint</option>
+                        <option value="easeOutQuint">EaseOutQuint</option>
+                        <option value="easeInOutQuint">EaseInOutQuint</option>
+                        <option value="easeInSine">EaseInSine</option>
+                        <option value="easeOutSine">EaseOutSine</option>
+                        <option value="easeInOutSine">EaseInOutSine</option>
+                        <option value="easeInExpo">EaseInExpo</option>
+                        <option value="easeOutExpo">EaseOutExpo</option>
+                        <option value="easeInOutExpo">EaseInOutExpo</option>
                     </select>
                 </div>
                 <div
@@ -115,6 +132,23 @@
                     <select id="easingStart" v-model="easingStart">
                         <option value="linear">Linear</option>
                         <option value="easeInQuad">EaseInQuad</option>
+                        <option value="easeOutQuad">EaseOutQuad</option>
+                        <option value="easeInOutQuad">EaseInOutQuad</option>
+                        <option value="easeInCubic">EaseInCubic</option>
+                        <option value="easeOutCubic">EaseOutCubic</option>
+                        <option value="easeInOutCubic">EaseInOutCubic</option>
+                        <option value="easeInQuart">EaseInQuart</option>
+                        <option value="easeOutQuart">EaseOutQuart</option>
+                        <option value="easeInOutQuart">EaseInOutQuart</option>
+                        <option value="easeInQuint">EaseInQuint</option>
+                        <option value="easeOutQuint">EaseOutQuint</option>
+                        <option value="easeInOutQuint">EaseInOutQuint</option>
+                        <option value="easeInSine">EaseInSine</option>
+                        <option value="easeOutSine">EaseOutSine</option>
+                        <option value="easeInOutSine">EaseInOutSine</option>
+                        <option value="easeInExpo">EaseInExpo</option>
+                        <option value="easeOutExpo">EaseOutExpo</option>
+                        <option value="easeInOutExpo">EaseInOutExpo</option>
                     </select>
                 </div>
                 <div
@@ -130,10 +164,27 @@
                     <input type="checkbox" id="capEnd" class="custom-checkbox" v-model="capEnd" />
                 </div>
                 <div class="adjustment-control" v-if="taperEnd !== 0">
-                    <label for="easingEnd">Easing Start: </label>
+                    <label for="easingEnd">Easing End: </label>
                     <select id="easingEnd" v-model="easingEnd">
                         <option value="linear">Linear</option>
                         <option value="easeInQuad">EaseInQuad</option>
+                        <option value="easeOutQuad">EaseOutQuad</option>
+                        <option value="easeInOutQuad">EaseInOutQuad</option>
+                        <option value="easeInCubic">EaseInCubic</option>
+                        <option value="easeOutCubic">EaseOutCubic</option>
+                        <option value="easeInOutCubic">EaseInOutCubic</option>
+                        <option value="easeInQuart">EaseInQuart</option>
+                        <option value="easeOutQuart">EaseOutQuart</option>
+                        <option value="easeInOutQuart">EaseInOutQuart</option>
+                        <option value="easeInQuint">EaseInQuint</option>
+                        <option value="easeOutQuint">EaseOutQuint</option>
+                        <option value="easeInOutQuint">EaseInOutQuint</option>
+                        <option value="easeInSine">EaseInSine</option>
+                        <option value="easeOutSine">EaseOutSine</option>
+                        <option value="easeInOutSine">EaseInOutSine</option>
+                        <option value="easeInExpo">EaseInExpo</option>
+                        <option value="easeOutExpo">EaseOutExpo</option>
+                        <option value="easeInOutExpo">EaseInOutExpo</option>
                     </select>
                 </div>
             </div>
@@ -152,9 +203,9 @@ let currentElement: BrushElement | null = null;
 const isLoading = ref(true);
 const isDrawing = ref(false);
 const buttons: { src: string; img: CanvasImageSource | null }[] = [
-    { src: 'image1.png', img: null },
-    { src: 'image2.png', img: null },
-    { src: 'image3.png', img: null },
+    { src: 'image1.jpg', img: null },
+    { src: 'image2.jpg', img: null },
+    { src: 'image3.jpg', img: null },
     { src: 'image4.png', img: null },
     { src: 'image5.png', img: null },
     { src: 'image6.png', img: null },
@@ -177,10 +228,11 @@ const container: Ref<HTMLDivElement | null> = ref(null);
 let options: BrushPotions = getOptions();
 
 function getFillOptions() {
-    const fillType = selectedButtonIndex.value === 0 ? 'image' : 'color';
+    const fillType = buttons[selectedButtonIndex.value].img ? 'image' : 'color';
     const fillColor = '#000000';
-    const fillImage: CanvasImageSource | undefined =
-        selectedButtonIndex.value === 0 ? buttons[selectedButtonIndex.value].img! : undefined;
+    const fillImage: CanvasImageSource | null = buttons[selectedButtonIndex.value].img
+        ? buttons[selectedButtonIndex.value].img
+        : null;
     return { fillType, fillColor, fillImage };
 }
 
@@ -189,11 +241,22 @@ function getOptions() {
     return {
         fillType: fillOptions.fillType,
         fillColor: fillOptions.fillColor,
-        fillImage: fillOptions.fillImage,
+        fillImage: fillOptions.fillImage || undefined,
         fillSize: size.value,
         thinning: thinning.value,
         smoothing: smoothing.value,
         simplifyPoints: simplifyPoints.value,
+        easing: easing.value,
+        start: {
+            cap: capStart.value,
+            taper: taperStart.value === 100 ? true : taperStart.value,
+            easing: easingStart.value,
+        },
+        end: {
+            cap: capEnd.value,
+            taper: taperEnd.value === 100 ? true : taperEnd.value,
+            easing: easingEnd.value,
+        },
     } as BrushPotions;
 }
 

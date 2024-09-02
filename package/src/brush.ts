@@ -3,9 +3,9 @@ import simplify from 'simplify-js';
 
 import { Point } from './common/point';
 import { Rect } from './common/rect';
+import { Easing, EASINGS } from './easing';
 
 export declare type FillType = 'color' | 'image';
-export declare type EasingType = 'linear' | 'easeInQuad';
 
 export interface BrushPotions {
     simplifyPoints?: number;
@@ -13,16 +13,16 @@ export interface BrushPotions {
     smoothing?: number;
     streamline?: number;
 
-    easing?: EasingType;
+    easing?: Easing;
     start?: {
         cap?: boolean;
         taper?: number | boolean;
-        easing?: EasingType;
+        easing?: Easing;
     };
     end?: {
         cap?: boolean;
         taper?: number | boolean;
-        easing?: EasingType;
+        easing?: Easing;
     };
 
     fillType: 'color' | 'image';
@@ -108,6 +108,25 @@ export class FreehandBrush {
             thinning: this._options.thinning,
             streamline: this._options.streamline,
             smoothing: this._options.smoothing,
+            easing: this._options.easing ? EASINGS[this._options.easing] : undefined,
+            start: this._options.start
+                ? {
+                      cap: this._options.start.cap,
+                      taper: this._options.start.taper,
+                      easing: this._options.start.easing
+                          ? EASINGS[this._options.start.easing]
+                          : undefined,
+                  }
+                : undefined,
+            end: this._options.end
+                ? {
+                      cap: this._options.end.cap,
+                      taper: this._options.end.taper,
+                      easing: this._options.end.easing
+                          ? EASINGS[this._options.end.easing]
+                          : undefined,
+                  }
+                : undefined,
         });
         const simplifyPoints = simplify(
             strokePoints.map((item) => {
