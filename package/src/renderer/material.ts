@@ -17,12 +17,19 @@ export function renderMaterial(
         const angle = angleBetween2Points(start, end);
         const offset = options.material!.stackRepeat ? 1 : options.size / 3;
         for (let z = 0; z <= distance || z === 0; z += offset) {
-            const x = start.x + Math.sin(angle) * z - options.size / 2;
-            const y = start.y + Math.cos(angle) * z - options.size / 2;
+            let x = start.x + Math.sin(angle) * z - options.size / 2;
+            let y = start.y + Math.cos(angle) * z - options.size / 2;
+
             context.save();
             if (!options.material!.stackRepeat) {
+                const randomAngle = Math.random() * 2 * Math.PI;
+                const randomOffset = 3;
+                const randomOffsetX = (Math.random() - 0.5) * randomOffset;
+                const randomOffsetY = (Math.random() - 0.5) * randomOffset;
+                x += randomOffsetX;
+                y += randomOffsetY;
                 context.translate(x + options.size / 2, y + options.size / 2);
-                context.rotate(angle);
+                context.rotate(randomAngle);
                 context.translate(-(x + options.size / 2), -(y + options.size / 2));
             }
             context.drawImage(options.material!.img, x, y, options.size, options.size);
