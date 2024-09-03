@@ -7,10 +7,10 @@ export function renderInk(
     options: BrushPotions
 ) {
     context.lineJoin = context.lineCap = 'round';
-    if (options.fillType === 'color') {
-        context.fillStyle = options.fillColor!;
-    } else if (options.fillType === 'image') {
-        context.fillStyle = context.createPattern(options.fillImage!, 'repeat')!;
+    if (options.ink.fillType === 'color') {
+        context.fillStyle = options.ink.fillColor!;
+    } else if (options.ink.fillType === 'image') {
+        context.fillStyle = context.createPattern(options.ink.fillImage!, 'repeat')!;
     }
 
     context.beginPath();

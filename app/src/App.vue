@@ -256,10 +256,10 @@ const container: Ref<HTMLDivElement | null> = ref(null);
 const materialBrushStyles: (MaterialBrushOptions & { src: string })[] = [
     { src: 'mb_style1.png', img: null!, stackRepeat: true },
     { src: 'mb_style2.png', img: null!, stackRepeat: true },
-    { src: 'mb_style3.png', img: null!, stackRepeat: true },
+    { src: 'mb_style3.png', img: null!, stackRepeat: false },
     { src: 'mb_style4.png', img: null!, stackRepeat: true },
-    { src: 'mb_style5.png', img: null!, stackRepeat: true },
-    { src: 'mb_style6.png', img: null!, stackRepeat: true },
+    { src: 'mb_style5.png', img: null!, stackRepeat: false },
+    { src: 'mb_style6.png', img: null!, stackRepeat: false },
 ];
 
 // Ink Brush
@@ -364,6 +364,7 @@ watch(
 
 watch(
     () => [
+        brushType.value,
         simplifyPoints.value,
         size.value,
         thinning.value,

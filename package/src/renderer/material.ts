@@ -15,10 +15,18 @@ export function renderMaterial(
         const end: Point = { x: points[index].x, y: points[index].y };
         const distance = Math.floor(distanceBetween2Points(start, end));
         const angle = angleBetween2Points(start, end);
-        for (let z = 0; z <= distance || z === 0; z++) {
+        const offset = options.material!.stackRepeat ? 1 : options.size / 3;
+        for (let z = 0; z <= distance || z === 0; z += offset) {
             const x = start.x + Math.sin(angle) * z - options.size / 2;
             const y = start.y + Math.cos(angle) * z - options.size / 2;
+            context.save();
+            if (!options.material!.stackRepeat) {
+                context.translate(x + options.size / 2, y + options.size / 2);
+                context.rotate(angle);
+                context.translate(-(x + options.size / 2), -(y + options.size / 2));
+            }
             context.drawImage(options.material!.img, x, y, options.size, options.size);
+            context.restore();
         }
     }
 }
