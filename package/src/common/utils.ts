@@ -1,3 +1,5 @@
+import { Point } from './point';
+
 const average = (a: number, b: number) => (a + b) / 2;
 
 export function generateSVGPath(pathData: string, width = 500, height = 500) {
@@ -34,4 +36,23 @@ export function getSvgPathFromStroke(points: number[][], closed = true) {
     }
 
     return result;
+}
+
+export function distanceBetween2Points(point1: Point, point2: Point) {
+    const dx = point2.x - point1.x;
+    const dy = point2.y - point1.y;
+    return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+}
+
+export function angleBetween2Points(point1: Point, point2: Point) {
+    const dx = point2.x - point1.x;
+    const dy = point2.y - point1.y;
+    return Math.atan2(dx, dy);
+}
+
+export function midPointBtw(p1: Point, p2: Point): Point {
+    return {
+        x: p1.x + (p2.x - p1.x) / 2,
+        y: p1.y + (p2.y - p1.y) / 2,
+    };
 }
