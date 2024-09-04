@@ -1,15 +1,13 @@
-import getStroke from 'perfect-freehand';
-import simplify from 'simplify-js';
-
-import { Point } from './common/point';
+import { Point, RenderPoint } from './common/point';
 import { Rect } from './common/rect';
-import { EASINGS } from './easing';
+import { getPointKey } from './common/utils';
 import { BrushPotions } from './options';
-import { renderInk } from './renderer/ink';
-import { renderMaterial } from './renderer/material';
+import { renderInk, updateSmoothAndSimplifiedRenderPoints } from './renderer/ink';
+import { renderMaterial, updateMaterialRenderPoints } from './renderer/material';
 
 export class FreehandBrush {
     private _points: Point[] = [];
+    private _renderedPoints: Map<string, RenderPoint> = new Map();
     private _options: BrushPotions;
     private _canvas: HTMLCanvasElement;
     private _pointsBBox: Rect;
@@ -70,17 +68,6 @@ export class FreehandBrush {
         return this._canvas;
     }
 
-    private _drawRotatedImage(image: CanvasImageSource, angle: number) {
-        const canvas = document.createElement('canvas')!;
-        canvas.width = 70;
-        canvas.height = 70;
-        const ctx = canvas.getContext('2d')!;
-        ctx.translate(35, 35);
-        ctx.rotate(angle);
-        ctx.drawImage(image, -35, -35, 70, 70);
-        return canvas;
-    }
-
     draw(): HTMLCanvasElement | null {
         const dpr = Math.max(2, window.devicePixelRatio);
         const context = this._canvas.getContext('2d')!;
@@ -92,38 +79,18 @@ export class FreehandBrush {
         this._canvas.style.width = `${width}px`;
         this._canvas.style.height = `${height}px`;
 
-        const strokePoints = getStroke(this._points, {
-            simulatePressure: true,
-            size: this._options.type === 'ink' ? this._options.size : 1,
-            thinning: this._options.ink?.thinning,
-            streamline: this._options.ink?.streamline,
-            smoothing: this._options.ink?.smoothing,
-            easing: this._options.ink?.easing ? EASINGS[this._options.ink.easing] : undefined,
-            start: this._options.ink?.start
-                ? {
-                      cap: this._options.ink.start.cap,
-                      taper: this._options.ink.start.taper,
-                      easing: this._options.ink.start.easing
-                          ? EASINGS[this._options.ink.start.easing]
-                          : undefined,
-                  }
-                : undefined,
-            end: this._options.ink?.end
-                ? {
-                      cap: this._options.ink.end.cap,
-                      taper: this._options.ink.end.taper,
-                      easing: this._options.ink.end.easing
-                          ? EASINGS[this._options.ink.end.easing]
-                          : undefined,
-                  }
-                : undefined,
+        const renderPoints =
+            this._options.type === 'material'
+                ? updateMaterialRenderPoints(this._points, this._renderedPoints, this._options)
+                : updateSmoothAndSimplifiedRenderPoints(
+                      this._points,
+                      this._renderedPoints,
+                      this._options
+                  );
+        this._renderedPoints.clear();
+        renderPoints.forEach((point, index) => {
+            this._renderedPoints.set(getPointKey(index, point), point);
         });
-        const simplifyPoints = simplify(
-            strokePoints.map((item) => {
-                return { x: item[0], y: item[1] };
-            }),
-            this._options.simplifyPoints || 0.1
-        );
 
         context.save();
         context.scale(dpr, dpr);
@@ -132,9 +99,9 @@ export class FreehandBrush {
             this._realBBox.top < 0 ? -this._realBBox.top : 0
         );
         if (this._options.type === 'material') {
-            renderMaterial(context, simplifyPoints, this._options);
+            renderMaterial(context, renderPoints, this._options);
         } else if (this._options.type === 'ink') {
-            renderInk(context, simplifyPoints, this._options);
+            renderInk(context, renderPoints, this._options);
         }
         context.restore();
 

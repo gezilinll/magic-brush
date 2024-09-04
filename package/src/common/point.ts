@@ -7,3 +7,10 @@ export class Point {
         this.y = _y;
     }
 }
+
+export class RenderPoint extends Point {
+    angle: number[] = [];
+    offsetX: number[] = [];
+    offsetY: number[] = [];
+    rendered: boolean = false;
+}

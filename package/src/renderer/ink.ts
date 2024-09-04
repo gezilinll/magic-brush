@@ -1,5 +1,52 @@
+import getStroke from 'perfect-freehand';
+import simplify from 'simplify-js';
+
 import { BrushPotions, Point } from '..';
+import { RenderPoint } from '../common/point';
 import { midPointBtw } from '../common/utils';
+import { Easing, EASINGS } from '../easing';
+
+export function updateSmoothAndSimplifiedRenderPoints(
+    points: Point[],
+    _cached: Map<string, RenderPoint>,
+    options: BrushPotions
+): RenderPoint[] {
+    const strokePoints = getStroke(points, {
+        simulatePressure: true,
+        size: options.type === 'ink' ? options.size : 1,
+        thinning: options.ink?.thinning,
+        streamline: options.ink?.streamline,
+        smoothing: options.ink?.smoothing,
+        easing: options.ink?.easing ? EASINGS[options.ink.easing as Easing] : undefined,
+        start: options.ink?.start
+            ? {
+                  cap: options.ink.start.cap,
+                  taper: options.ink.start.taper,
+                  easing: options.ink.start.easing
+                      ? EASINGS[options.ink.start.easing as Easing]
+                      : undefined,
+              }
+            : undefined,
+        end: options.ink?.end
+            ? {
+                  cap: options.ink.end.cap,
+                  taper: options.ink.end.taper,
+                  easing: options.ink.end.easing
+                      ? EASINGS[options.ink.end.easing as Easing]
+                      : undefined,
+              }
+            : undefined,
+    });
+    const simplifyPoints = simplify(
+        strokePoints.map((point) => {
+            return { x: point[0], y: point[1] };
+        }),
+        options.simplifyPoints || 0.1
+    );
+    return simplifyPoints.map((point) => {
+        return { ...point, rendered: false, angle: [], offsetX: [], offsetY: [] };
+    });
+}
 
 export function renderInk(
     context: CanvasRenderingContext2D,

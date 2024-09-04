@@ -56,3 +56,7 @@ export function midPointBtw(p1: Point, p2: Point): Point {
         y: p1.y + (p2.y - p1.y) / 2,
     };
 }
+
+export function getPointKey(prefix: string | number, point: Point) {
+    return `${prefix}_${point.x}_${point.y}`;
+}

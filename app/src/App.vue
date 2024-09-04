@@ -52,7 +52,7 @@
                     :style="{ backgroundImage: `url(${btn.src})` }"
                 ></button>
             </div>
-            <div style="position: absolute; margin-top: 50px">
+            <div style="position: absolute; margin-top: 120px">
                 <div class="adjustments">
                     <div
                         style="width: 90%; height: 1px; background-color: black; margin-top: 10px"
@@ -237,6 +237,7 @@
 </template>
 
 <script setup lang="ts">
+import { throttle } from 'lodash';
 import { BrushPotions, FreehandBrush, InkBrushOptions, MaterialBrushOptions } from 'magic-freehand';
 import { onMounted, Ref, ref, watch } from 'vue';
 
@@ -260,6 +261,7 @@ const materialBrushStyles: (MaterialBrushOptions & { src: string })[] = [
     { src: 'mb_style4.png', img: null!, stackRepeat: true },
     { src: 'mb_style5.png', img: null!, stackRepeat: false },
     { src: 'mb_style6.png', img: null!, stackRepeat: false },
+    { src: 'mb_style7.png', img: null!, stackRepeat: false },
 ];
 
 // Ink Brush
@@ -335,18 +337,25 @@ function startDrawing(event: MouseEvent) {
     container.value!.appendChild(currentElement.brush.canvas);
 }
 
+const drawBrush = throttle((element: BrushElement, x: number, y: number) => {
+    element.brush.addPoint({
+        x,
+        y,
+    });
+    const result = element!.brush.canvas;
+    result.style.left = `${element.initLeft + element.brush.left}px`;
+    result.style.top = `${element.initTop + element.brush.top}px`;
+    currentElement!.brush.draw();
+}, 20);
 async function drawing(event: MouseEvent) {
     if (!isDrawing.value) {
         return;
     }
-    currentElement!.brush.addPoint({
-        x: event.offsetX - currentElement!.initLeft,
-        y: event.offsetY - currentElement!.initTop,
-    });
-    const result = currentElement!.brush.canvas;
-    result.style.left = `${currentElement!.initLeft + currentElement!.brush.left}px`;
-    result.style.top = `${currentElement!.initTop + currentElement!.brush.top}px`;
-    await currentElement!.brush.draw();
+    drawBrush(
+        currentElement!,
+        event.offsetX - currentElement!.initLeft,
+        event.offsetY - currentElement!.initTop
+    );
 }
 
 function stopDrawing() {
@@ -364,7 +373,6 @@ watch(
 
 watch(
     () => [
-        brushType.value,
         simplifyPoints.value,
         size.value,
         thinning.value,
@@ -387,6 +395,13 @@ watch(
             result.style.top = `${element!.initTop + element!.brush.top}px`;
             await element!.brush.draw();
         });
+    }
+);
+
+watch(
+    () => [brushType.value],
+    () => {
+        selectedButtonIndex.value = 0;
     }
 );
 
