@@ -4,7 +4,9 @@ export declare type BrushType = 'material' | 'ink';
 
 export interface MaterialBrushOptions {
     img: CanvasImageSource;
-    stackRepeat: boolean;
+    repeatMode: 'compact' | 'incompact';
+    minRandomOffset?: number;
+    maxRandomOffset?: number;
 }
 
 export interface InkBrushOptions {
@@ -27,6 +29,7 @@ export interface InkBrushOptions {
     fillType: 'color' | 'image';
     fillImg?: CanvasImageSource;
     fillColor?: string;
+    useHardLight?: boolean;
 }
 
 export interface BrushPotions {

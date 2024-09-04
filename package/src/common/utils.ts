@@ -60,3 +60,10 @@ export function midPointBtw(p1: Point, p2: Point): Point {
 export function getPointKey(prefix: string | number, point: Point) {
     return `${prefix}_${point.x}_${point.y}`;
 }
+
+export function getRandomInt(min: number, max: number): number {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}

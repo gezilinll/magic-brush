@@ -12,7 +12,7 @@
             :style="{
                 pointerEvents: isDrawing ? 'none' : 'auto',
                 userSelect: isDrawing ? 'none' : 'auto',
-                height: brushType === 'material' ? '300px' : '550px',
+                height: brushType === 'material' ? '480px' : '620px',
             }"
         >
             <div class="buttons">
@@ -49,15 +49,40 @@
                     :key="index"
                     :class="{ active: selectedButtonIndex === index }"
                     @click="selectedButtonIndex = index"
-                    :style="{ backgroundImage: `url(${btn.src})` }"
+                    :style="{
+                        backgroundImage:
+                            index === 5
+                                ? `linear-gradient(${fillColor}, ${fillColor})`
+                                : `url(${btn.src})`,
+                    }"
                 ></button>
             </div>
-            <div style="position: absolute; margin-top: 120px">
+            <div class="color-picker" v-if="brushType === 'ink'">
+                <div
+                    v-for="color in colors"
+                    :key="color"
+                    :class="['color-button', { selected: fillColor === color }]"
+                    @click="fillColor = color"
+                    :style="{ backgroundColor: color }"
+                ></div>
+            </div>
+            <div
+                :style="{
+                    position: 'absolute',
+                    marginTop: brushType === 'material' ? '200px' : '120px',
+                }"
+            >
                 <div class="adjustments">
                     <div
                         style="width: 90%; height: 1px; background-color: black; margin-top: 10px"
                     ></div>
-                    <div class="adjustment-control">
+                    <div
+                        class="adjustment-control"
+                        v-if="
+                            brushType === 'ink' ||
+                            materialBrushStyles[selectedButtonIndex].repeatMode === 'compact'
+                        "
+                    >
                         <label for="simplifyPoints">Simplify: </label>
                         <input
                             id="simplifyPoints"
@@ -73,6 +98,40 @@
                         <label for="size">Size: </label>
                         <input id="size" type="range" min="1" max="100" v-model.number="size" />
                         <span>{{ size }}</span>
+                    </div>
+                    <div
+                        class="adjustment-control"
+                        v-if="
+                            brushType === 'material' &&
+                            materialBrushStyles[selectedButtonIndex].repeatMode === 'incompact'
+                        "
+                    >
+                        <label for="size">Min Offset: </label>
+                        <input
+                            id="size"
+                            type="range"
+                            :min="-5"
+                            :max="0"
+                            v-model.number="minRandomOffset"
+                        />
+                        <span>{{ minRandomOffset }}</span>
+                    </div>
+                    <div
+                        class="adjustment-control"
+                        v-if="
+                            brushType === 'material' &&
+                            materialBrushStyles[selectedButtonIndex].repeatMode === 'incompact'
+                        "
+                    >
+                        <label for="size">Max Offset: </label>
+                        <input
+                            id="size"
+                            type="range"
+                            min="0"
+                            max="5"
+                            v-model.number="maxRandomOffset"
+                        />
+                        <span>{{ maxRandomOffset }}</span>
                     </div>
                     <div class="adjustment-control" v-if="brushType === 'ink'">
                         <label for="thinning">Thinning: </label>
@@ -250,27 +309,43 @@ const isLoading = ref(true);
 const isDrawing = ref(false);
 const selectedButtonIndex = ref(0);
 const simplifyPoints = ref(0.5);
-const size = ref(16);
+const size = ref(36);
 const container: Ref<HTMLDivElement | null> = ref(null);
 
 // Material Brush
 const materialBrushStyles: (MaterialBrushOptions & { src: string })[] = [
-    { src: 'mb_style1.png', img: null!, stackRepeat: true },
-    { src: 'mb_style2.png', img: null!, stackRepeat: true },
-    { src: 'mb_style3.png', img: null!, stackRepeat: false },
-    { src: 'mb_style4.png', img: null!, stackRepeat: true },
-    { src: 'mb_style5.png', img: null!, stackRepeat: false },
-    { src: 'mb_style6.png', img: null!, stackRepeat: false },
-    { src: 'mb_style7.png', img: null!, stackRepeat: false },
+    { src: 'mb_style1.png', img: null!, repeatMode: 'compact' },
+    { src: 'mb_style2.png', img: null!, repeatMode: 'compact' },
+    { src: 'mb_style3.png', img: null!, repeatMode: 'compact' },
+    { src: 'mb_style4.png', img: null!, repeatMode: 'compact' },
+    { src: 'mb_style5.png', img: null!, repeatMode: 'incompact' },
+    { src: 'mb_style6.png', img: null!, repeatMode: 'incompact' },
+    { src: 'mb_style7.png', img: null!, repeatMode: 'incompact' },
+    { src: 'mb_style8.png', img: null!, repeatMode: 'incompact' },
+    { src: 'mb_style9.png', img: null!, repeatMode: 'incompact' },
+    { src: 'mb_style10.png', img: null!, repeatMode: 'incompact' },
+    { src: 'mb_style11.png', img: null!, repeatMode: 'incompact' },
+    { src: 'mb_style12.png', img: null!, repeatMode: 'incompact' },
 ];
+const minRandomOffset = ref(-3);
+const maxRandomOffset = ref(3);
 
 // Ink Brush
-const inkBrushStyles: { src: string; fillImg: CanvasImageSource; fillType: 'image' | 'color' }[] = [
-    { src: 'ib_style1.jpg', fillImg: null!, fillType: 'image' },
-    { src: 'ib_style2.jpg', fillImg: null!, fillType: 'image' },
-    { src: 'ib_style3.jpg', fillImg: null!, fillType: 'image' },
-    { src: 'ib_style4.jpg', fillImg: null!, fillType: 'image' },
+const inkBrushStyles: {
+    src: string;
+    fillImg: CanvasImageSource;
+    fillType: 'image' | 'color';
+    useHardLight: boolean;
+}[] = [
+    { src: 'ib_style1.jpg', fillImg: null!, fillType: 'image', useHardLight: true },
+    { src: 'ib_style2.jpg', fillImg: null!, fillType: 'image', useHardLight: true },
+    { src: 'ib_style3.jpg', fillImg: null!, fillType: 'image', useHardLight: true },
+    { src: 'ib_style4.jpg', fillImg: null!, fillType: 'image', useHardLight: true },
+    { src: 'ib_style5.jpg', fillImg: null!, fillType: 'image', useHardLight: true },
+    { src: '', fillImg: null!, fillType: 'color', useHardLight: false },
 ];
+const colors = ['#006994', '#FF4500', '#228B22', '#7851A9', '#FFB7C5'];
+const fillColor = ref('#006994');
 const thinning = ref(0.6);
 const streamline = ref(0.5);
 const smoothing = ref(0.5);
@@ -286,12 +361,17 @@ let options: BrushPotions = getOptions();
 
 function getBrushOptions(): MaterialBrushOptions | InkBrushOptions {
     if (brushType.value === 'material') {
-        return materialBrushStyles[selectedButtonIndex.value] as MaterialBrushOptions;
+        return {
+            ...materialBrushStyles[selectedButtonIndex.value],
+            minRandomOffset: minRandomOffset.value,
+            maxRandomOffset: maxRandomOffset.value,
+        };
     } else {
         return {
-            fillType: 'image',
-            fillColor: '#000000',
+            fillType: inkBrushStyles[selectedButtonIndex.value].fillType,
+            fillColor: fillColor.value,
             fillImage: inkBrushStyles[selectedButtonIndex.value].fillImg,
+            useHardLight: inkBrushStyles[selectedButtonIndex.value].useHardLight,
             fillSize: size.value,
             thinning: thinning.value,
             smoothing: smoothing.value,
@@ -376,6 +456,9 @@ watch(
         simplifyPoints.value,
         size.value,
         thinning.value,
+        fillColor.value,
+        minRandomOffset.value,
+        maxRandomOffset.value,
         streamline.value,
         smoothing.value,
         easing.value,
@@ -388,13 +471,6 @@ watch(
     ],
     () => {
         options = getOptions();
-        elements.forEach(async (element) => {
-            element.brush.updateOptions(options);
-            const result = element!.brush.canvas;
-            result.style.left = `${element!.initLeft + element!.brush.left}px`;
-            result.style.top = `${element!.initTop + element!.brush.top}px`;
-            await element!.brush.draw();
-        });
     }
 );
 
@@ -402,6 +478,7 @@ watch(
     () => [brushType.value],
     () => {
         selectedButtonIndex.value = 0;
+        options = getOptions();
     }
 );
 
@@ -533,5 +610,24 @@ select {
 .custom-checkbox:checked {
     background-color: #007bff;
     border-color: #007bff;
+}
+
+.color-picker {
+    display: flex;
+    flex-direction: row;
+    padding-left: 2px;
+    height: 220px;
+}
+
+.color-button {
+    width: 55px;
+    height: 55px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.color-button.selected {
+    border-color: #000; /* 选中按钮的边框颜色 */
 }
 </style>

@@ -6,6 +6,18 @@ import { RenderPoint } from '../common/point';
 import { midPointBtw } from '../common/utils';
 import { Easing, EASINGS } from '../easing';
 
+function getHardLightResult(options: BrushPotions) {
+    const canvas = document.createElement('canvas');
+    canvas.width = options.ink.fillImage.width;
+    canvas.height = options.ink.fillImage.height;
+    const ctx = canvas.getContext('2d')!;
+    ctx.fillStyle = options.ink.fillColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = 'hard-light';
+    ctx.drawImage(options.ink.fillImage, 0, 0, canvas.width, canvas.height);
+    return canvas;
+}
+
 export function updateSmoothAndSimplifiedRenderPoints(
     points: Point[],
     _cached: Map<string, RenderPoint>,
@@ -57,7 +69,9 @@ export function renderInk(
     if (options.ink.fillType === 'color') {
         context.fillStyle = options.ink.fillColor!;
     } else if (options.ink.fillType === 'image') {
-        context.fillStyle = context.createPattern(options.ink.fillImage!, 'repeat')!;
+        context.fillStyle = options.ink.useHardLight
+            ? context.createPattern(getHardLightResult(options), 'repeat')!
+            : context.createPattern(options.ink.fillImage!, 'repeat')!;
     }
 
     context.beginPath();
