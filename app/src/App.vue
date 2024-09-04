@@ -345,7 +345,7 @@ const drawBrush = throttle((element: BrushElement, x: number, y: number) => {
     const result = element!.brush.canvas;
     result.style.left = `${element.initLeft + element.brush.left}px`;
     result.style.top = `${element.initTop + element.brush.top}px`;
-    currentElement!.brush.draw();
+    element.brush.draw();
 }, 20);
 async function drawing(event: MouseEvent) {
     if (!isDrawing.value) {
