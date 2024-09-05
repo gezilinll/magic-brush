@@ -29,6 +29,7 @@ export interface InkBrushOptions {
     fillType: 'color' | 'image';
     fillImg?: CanvasImageSource;
     fillColor?: string;
+    blendMode?: GlobalCompositeOperation;
     useHardLight?: boolean;
 }
 

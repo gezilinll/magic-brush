@@ -95,5 +95,13 @@
     ],
 
     "vue.complete.casing.props": "autoCamel",
-    "cSpell.words": ["compositionend", "compositionstart", "dppx", "EASINGS", "incompact", "uuidv"]
+    "cSpell.words": [
+        "catmull",
+        "compositionend",
+        "compositionstart",
+        "dppx",
+        "EASINGS",
+        "incompact",
+        "uuidv"
+    ]
 }

@@ -13,7 +13,7 @@ function getHardLightResult(options: BrushPotions) {
     const ctx = canvas.getContext('2d')!;
     ctx.fillStyle = options.ink.fillColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.globalCompositeOperation = 'hard-light';
+    ctx.globalCompositeOperation = options.ink.blendMode;
     ctx.drawImage(options.ink.fillImage, 0, 0, canvas.width, canvas.height);
     return canvas;
 }
@@ -69,7 +69,7 @@ export function renderInk(
     if (options.ink.fillType === 'color') {
         context.fillStyle = options.ink.fillColor!;
     } else if (options.ink.fillType === 'image') {
-        context.fillStyle = options.ink.useHardLight
+        context.fillStyle = options.ink.blendMode
             ? context.createPattern(getHardLightResult(options), 'repeat')!
             : context.createPattern(options.ink.fillImage!, 'repeat')!;
     }

@@ -12,7 +12,7 @@
             :style="{
                 pointerEvents: isDrawing ? 'none' : 'auto',
                 userSelect: isDrawing ? 'none' : 'auto',
-                height: brushType === 'material' ? '480px' : '620px',
+                height: brushType === 'material' ? '530px' : '660px',
             }"
         >
             <div class="buttons">
@@ -57,19 +57,61 @@
                     }"
                 ></button>
             </div>
-            <div class="color-picker" v-if="brushType === 'ink'">
-                <div
+            <div
+                style="position: absolute; margin-top: 230px; margin-left: 16px"
+                v-if="brushType === 'ink'"
+            >
+                <button
                     v-for="color in colors"
                     :key="color"
                     :class="['color-button', { selected: fillColor === color }]"
                     @click="fillColor = color"
                     :style="{ backgroundColor: color }"
-                ></div>
+                ></button>
+            </div>
+            <div
+                style="position: absolute; margin-top: 300px; margin-left: 16px"
+                v-if="brushType === 'ink' && selectedButtonIndex < 5"
+            >
+                <label for="blendMode">Blend Mode: </label>
+                <select id="blendMode" v-model="blendMode">
+                    <option value="linear">color</option>
+                    <option value="color-burn">color-burn</option>
+                    <option value="color-dodge">color-dodge</option>
+                    <option value="copy">copy</option>
+                    <option value="darken">darken</option>
+                    <option value="destination-atop">destination-atop</option>
+                    <option value="destination-in">destination-in</option>
+                    <option value="destination-out">destination-out</option>
+                    <option value="destination-over">destination-over</option>
+                    <option value="difference">difference</option>
+                    <option value="exclusion">exclusion</option>
+                    <option value="hard-light">hard-light</option>
+                    <option value="hue">hue</option>
+                    <option value="lighten">lighten</option>
+                    <option value="lighter">lighter</option>
+                    <option value="luminosity">luminosity</option>
+                    <option value="multiply">multiply</option>
+                    <option value="overlay">overlay</option>
+                    <option value="saturation">saturation</option>
+                    <option value="screen">screen</option>
+                    <option value="soft-light">soft-light</option>
+                    <option value="source-atop">source-atop</option>
+                    <option value="source-in">source-in</option>
+                    <option value="source-out">source-out</option>
+                    <option value="source-over">source-over</option>
+                    <option value="xor">xor</option>
+                </select>
             </div>
             <div
                 :style="{
                     position: 'absolute',
-                    marginTop: brushType === 'material' ? '200px' : '120px',
+                    marginTop:
+                        brushType === 'material'
+                            ? '260px'
+                            : brushType === 'ink' && selectedButtonIndex < 5
+                            ? '160px'
+                            : '120px',
                 }"
             >
                 <div class="adjustments">
@@ -322,10 +364,12 @@ const materialBrushStyles: (MaterialBrushOptions & { src: string })[] = [
     { src: 'mb_style6.png', img: null!, repeatMode: 'incompact' },
     { src: 'mb_style7.png', img: null!, repeatMode: 'incompact' },
     { src: 'mb_style8.png', img: null!, repeatMode: 'incompact' },
-    { src: 'mb_style9.png', img: null!, repeatMode: 'incompact' },
+    { src: 'mb_style9.png', img: null!, repeatMode: 'compact' },
     { src: 'mb_style10.png', img: null!, repeatMode: 'incompact' },
-    { src: 'mb_style11.png', img: null!, repeatMode: 'incompact' },
+    { src: 'mb_style11.png', img: null!, repeatMode: 'compact' },
     { src: 'mb_style12.png', img: null!, repeatMode: 'incompact' },
+    { src: 'mb_style13.png', img: null!, repeatMode: 'incompact' },
+    { src: 'mb_style14.png', img: null!, repeatMode: 'incompact' },
 ];
 const minRandomOffset = ref(-3);
 const maxRandomOffset = ref(3);
@@ -344,6 +388,7 @@ const inkBrushStyles: {
     { src: 'ib_style5.jpg', fillImg: null!, fillType: 'image', useHardLight: true },
     { src: '', fillImg: null!, fillType: 'color', useHardLight: false },
 ];
+const blendMode = ref('hard-light');
 const colors = ['#006994', '#FF4500', '#228B22', '#7851A9', '#FFB7C5'];
 const fillColor = ref('#006994');
 const thinning = ref(0.6);
@@ -371,7 +416,7 @@ function getBrushOptions(): MaterialBrushOptions | InkBrushOptions {
             fillType: inkBrushStyles[selectedButtonIndex.value].fillType,
             fillColor: fillColor.value,
             fillImage: inkBrushStyles[selectedButtonIndex.value].fillImg,
-            useHardLight: inkBrushStyles[selectedButtonIndex.value].useHardLight,
+            blendMode: blendMode.value,
             fillSize: size.value,
             thinning: thinning.value,
             smoothing: smoothing.value,
@@ -426,7 +471,7 @@ const drawBrush = throttle((element: BrushElement, x: number, y: number) => {
     result.style.left = `${element.initLeft + element.brush.left}px`;
     result.style.top = `${element.initTop + element.brush.top}px`;
     element.brush.draw();
-}, 20);
+}, 10);
 async function drawing(event: MouseEvent) {
     if (!isDrawing.value) {
         return;
@@ -459,6 +504,7 @@ watch(
         fillColor.value,
         minRandomOffset.value,
         maxRandomOffset.value,
+        blendMode.value,
         streamline.value,
         smoothing.value,
         easing.value,
@@ -615,13 +661,14 @@ select {
 .color-picker {
     display: flex;
     flex-direction: row;
-    padding-left: 2px;
-    height: 220px;
+    padding-left: 16px;
+    margin-top: 10px;
+    height: 70px;
 }
 
 .color-button {
-    width: 55px;
-    height: 55px;
+    width: 50px;
+    height: 50px;
     border: 2px solid transparent;
     cursor: pointer;
     transition: border-color 0.3s ease;
