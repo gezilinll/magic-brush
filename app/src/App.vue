@@ -145,7 +145,25 @@
                         class="adjustment-control"
                         v-if="
                             brushType === 'material' &&
-                            materialBrushStyles[selectedButtonIndex].repeatMode === 'incompact'
+                            materialBrushStyles[selectedButtonIndex].repeatMode ===
+                                'incompact-fixed'
+                        "
+                    >
+                        <label for="size">Fixed Offset: </label>
+                        <input
+                            id="size"
+                            type="range"
+                            :min="1"
+                            :max="10"
+                            v-model.number="fixedOffset"
+                        />
+                        <span>{{ fixedOffset }}</span>
+                    </div>
+                    <div
+                        class="adjustment-control"
+                        v-if="
+                            brushType === 'material' &&
+                            materialBrushStyles[selectedButtonIndex].repeatMode === 'incompact-size'
                         "
                     >
                         <label for="size">Min Offset: </label>
@@ -162,7 +180,7 @@
                         class="adjustment-control"
                         v-if="
                             brushType === 'material' &&
-                            materialBrushStyles[selectedButtonIndex].repeatMode === 'incompact'
+                            materialBrushStyles[selectedButtonIndex].repeatMode === 'incompact-size'
                         "
                     >
                         <label for="size">Max Offset: </label>
@@ -360,17 +378,18 @@ const materialBrushStyles: (MaterialBrushOptions & { src: string })[] = [
     { src: 'mb_style2.png', img: null!, repeatMode: 'compact' },
     { src: 'mb_style3.png', img: null!, repeatMode: 'compact' },
     { src: 'mb_style4.png', img: null!, repeatMode: 'compact' },
-    { src: 'mb_style5.png', img: null!, repeatMode: 'incompact' },
-    { src: 'mb_style6.png', img: null!, repeatMode: 'incompact' },
-    { src: 'mb_style7.png', img: null!, repeatMode: 'incompact' },
-    { src: 'mb_style8.png', img: null!, repeatMode: 'incompact' },
+    { src: 'mb_style5.png', img: null!, repeatMode: 'incompact-size' },
+    { src: 'mb_style6.png', img: null!, repeatMode: 'incompact-size' },
+    { src: 'mb_style7.png', img: null!, repeatMode: 'incompact-size' },
+    { src: 'mb_style8.png', img: null!, repeatMode: 'incompact-size' },
     { src: 'mb_style9.png', img: null!, repeatMode: 'compact' },
-    { src: 'mb_style10.png', img: null!, repeatMode: 'incompact' },
-    { src: 'mb_style11.png', img: null!, repeatMode: 'compact' },
-    { src: 'mb_style12.png', img: null!, repeatMode: 'incompact' },
-    { src: 'mb_style13.png', img: null!, repeatMode: 'incompact' },
-    { src: 'mb_style14.png', img: null!, repeatMode: 'incompact' },
+    { src: 'mb_style10.png', img: null!, repeatMode: 'incompact-size' },
+    { src: 'mb_style11.png', img: null!, repeatMode: 'incompact-fixed' },
+    { src: 'mb_style12.png', img: null!, repeatMode: 'incompact-size' },
+    { src: 'mb_style13.png', img: null!, repeatMode: 'incompact-size' },
+    { src: 'mb_style14.png', img: null!, repeatMode: 'incompact-size' },
 ];
+const fixedOffset = ref(3);
 const minRandomOffset = ref(-3);
 const maxRandomOffset = ref(3);
 
@@ -410,6 +429,7 @@ function getBrushOptions(): MaterialBrushOptions | InkBrushOptions {
             ...materialBrushStyles[selectedButtonIndex.value],
             minRandomOffset: minRandomOffset.value,
             maxRandomOffset: maxRandomOffset.value,
+            fixedOffset: fixedOffset.value,
         };
     } else {
         return {
@@ -507,6 +527,7 @@ watch(
         blendMode.value,
         streamline.value,
         smoothing.value,
+        fixedOffset.value,
         easing.value,
         taperStart.value,
         capStart.value,

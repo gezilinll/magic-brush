@@ -13,7 +13,7 @@ export function updateMaterialRenderPoints(
     cached: Map<string, RenderPoint>,
     options: BrushPotions
 ): RenderPoint[] {
-    if (options.material!.repeatMode === 'compact') {
+    if (options.material!.repeatMode !== 'incompact-size') {
         return updateSmoothAndSimplifiedRenderPoints(points, cached, options);
     }
     const result: RenderPoint[] = [];
@@ -43,25 +43,30 @@ export function renderMaterial(
             ? start.angle.length
             : Math.floor(distanceBetween2Points(start, end));
         const angle = start.rendered ? 0 : angleBetween2Points(start, end);
-        const offset =
-            options.material!.repeatMode === 'compact' || start.rendered ? 1 : options.size / 3;
+        let offset = 1;
+        if (!start.rendered && options.material!.repeatMode !== 'compact') {
+            offset =
+                options.material!.repeatMode === 'incompact-size'
+                    ? options.size / 3
+                    : options.material!.fixedOffset!;
+        }
         for (let z = 0; z <= distance || z === 0; z += offset) {
             const minRandomOffset = options.material?.minRandomOffset || -3;
             const maxRandomOffset = options.material?.maxRandomOffset || 3;
             const resultAngle =
-                options.material!.repeatMode === 'compact'
+                options.material!.repeatMode !== 'incompact-size'
                     ? 0
                     : start.rendered
                     ? start.angle[z]
                     : Math.random() * 2 * Math.PI;
             const resultOffsetX =
-                options.material!.repeatMode === 'compact'
+                options.material!.repeatMode !== 'incompact-size'
                     ? Math.sin(angle) * z
                     : start.rendered
                     ? start.offsetX[z]
                     : getRandomInt(minRandomOffset, maxRandomOffset) + Math.sin(angle) * z;
             const resultOffsetY =
-                options.material!.repeatMode === 'compact'
+                options.material!.repeatMode !== 'incompact-size'
                     ? Math.cos(angle) * z
                     : start.rendered
                     ? start.offsetY[z]
@@ -70,7 +75,7 @@ export function renderMaterial(
             const y = start.y + resultOffsetY - options.size / 2;
 
             context.save();
-            if (options.material!.repeatMode === 'incompact') {
+            if (options.material!.repeatMode === 'incompact-size') {
                 context.translate(x + options.size / 2, y + options.size / 2);
                 context.rotate(resultAngle);
                 context.translate(-(x + options.size / 2), -(y + options.size / 2));

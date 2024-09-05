@@ -4,9 +4,10 @@ export declare type BrushType = 'material' | 'ink';
 
 export interface MaterialBrushOptions {
     img: CanvasImageSource;
-    repeatMode: 'compact' | 'incompact';
+    repeatMode: 'compact' | 'incompact-size' | 'incompact-fixed';
     minRandomOffset?: number;
     maxRandomOffset?: number;
+    fixedOffset?: number;
 }
 
 export interface InkBrushOptions {
