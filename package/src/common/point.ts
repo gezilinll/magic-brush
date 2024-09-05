@@ -13,4 +13,5 @@ export class RenderPoint extends Point {
     offsetX: number[] = [];
     offsetY: number[] = [];
     rendered: boolean = false;
+    attachData: any = null;
 }

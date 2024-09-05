@@ -12,7 +12,8 @@
             :style="{
                 pointerEvents: isDrawing ? 'none' : 'auto',
                 userSelect: isDrawing ? 'none' : 'auto',
-                height: brushType === 'material' ? '530px' : '660px',
+                height:
+                    brushType === 'material' ? '530px' : brushType === 'ink' ? '660px' : '350px',
             }"
         >
             <div class="buttons">
@@ -23,6 +24,10 @@
                 <label>
                     <input type="radio" v-model="brushType" value="ink" />
                     Ink
+                </label>
+                <label>
+                    <input type="radio" v-model="brushType" value="toy" />
+                    Toy
                 </label>
             </div>
             <div
@@ -54,6 +59,17 @@
                             index === 5
                                 ? `linear-gradient(${fillColor}, ${fillColor})`
                                 : `url(${btn.src})`,
+                    }"
+                ></button>
+            </div>
+            <div class="buttons" style="margin-top: 50px" v-if="brushType === 'toy'">
+                <button
+                    v-for="(btn, index) in toyBrushStyles"
+                    :key="index"
+                    :class="{ active: selectedButtonIndex === index }"
+                    @click="selectedButtonIndex = index"
+                    :style="{
+                        backgroundImage: `url(${btn.src})`,
                     }"
                 ></button>
             </div>
@@ -121,8 +137,9 @@
                     <div
                         class="adjustment-control"
                         v-if="
-                            brushType === 'ink' ||
-                            materialBrushStyles[selectedButtonIndex].repeatMode === 'compact'
+                            brushType !== 'toy' &&
+                            (brushType === 'ink' ||
+                                materialBrushStyles[selectedButtonIndex].repeatMode === 'compact')
                         "
                     >
                         <label for="simplifyPoints">Simplify: </label>
@@ -421,6 +438,12 @@ const taperEnd = ref(0);
 const easingEnd = ref('linear');
 const capEnd = ref(true);
 
+// Toy Brush
+const toyBrushStyles: any[] = [
+    { src: 'felt-tip-marker.jpg', type: 'felt-tip-marker' },
+    { src: 'beads.jpg', type: 'beads' },
+];
+
 let options: BrushPotions = getOptions();
 
 function getBrushOptions(): MaterialBrushOptions | InkBrushOptions {
@@ -459,7 +482,10 @@ function getBrushOptions(): MaterialBrushOptions | InkBrushOptions {
 function getOptions() {
     const fillOptions = getBrushOptions();
     return {
-        type: brushType.value,
+        type:
+            brushType.value === 'toy'
+                ? toyBrushStyles[selectedButtonIndex.value].type
+                : brushType.value,
         size: size.value,
         simplifyPoints: simplifyPoints.value,
         material: brushType.value === 'material' ? fillOptions : undefined,

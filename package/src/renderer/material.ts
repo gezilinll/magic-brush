@@ -6,23 +6,26 @@ import {
     getRandomInt,
 } from '../common/utils';
 import { BrushPotions } from '../options';
-import { updateSmoothAndSimplifiedRenderPoints } from './ink';
 
 export function updateMaterialRenderPoints(
     points: Point[],
     cached: Map<string, RenderPoint>,
-    options: BrushPotions
+    _options: BrushPotions
 ): RenderPoint[] {
-    if (options.material!.repeatMode !== 'incompact-size') {
-        return updateSmoothAndSimplifiedRenderPoints(points, cached, options);
-    }
     const result: RenderPoint[] = [];
     points.forEach((point, index) => {
         const key = getPointKey(index, point);
         if (cached.has(key)) {
             result.push(cached.get(key)!);
         } else {
-            result.push({ ...point, angle: [], offsetX: [], offsetY: [], rendered: false });
+            result.push({
+                ...point,
+                angle: [],
+                offsetX: [],
+                offsetY: [],
+                rendered: false,
+                attachData: null,
+            });
         }
     });
     return result;

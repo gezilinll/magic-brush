@@ -1,6 +1,6 @@
 import { Easing } from './easing';
 
-export declare type BrushType = 'material' | 'ink';
+export declare type BrushType = 'material' | 'ink' | 'felt-tip-marker' | 'beads';
 
 export interface MaterialBrushOptions {
     img: CanvasImageSource;
@@ -33,6 +33,8 @@ export interface InkBrushOptions {
     blendMode?: GlobalCompositeOperation;
     useHardLight?: boolean;
 }
+
+export interface UniqueBrushOptions {}
 
 export interface BrushPotions {
     type: BrushType;

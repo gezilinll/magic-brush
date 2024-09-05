@@ -52,7 +52,15 @@ export function updateSmoothAndSimplifiedRenderPoints(
     });
 
     return strokePoints.map((point) => {
-        return { x: point[0], y: point[1], rendered: false, angle: [], offsetX: [], offsetY: [] };
+        return {
+            x: point[0],
+            y: point[1],
+            rendered: false,
+            angle: [],
+            offsetX: [],
+            offsetY: [],
+            attachData: null,
+        };
     });
 }
 

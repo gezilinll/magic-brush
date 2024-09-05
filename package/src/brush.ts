@@ -4,6 +4,7 @@ import { getPointKey } from './common/utils';
 import { BrushPotions } from './options';
 import { renderInk, updateSmoothAndSimplifiedRenderPoints } from './renderer/ink';
 import { renderMaterial, updateMaterialRenderPoints } from './renderer/material';
+import { renderUnique } from './renderer/unique';
 
 export class FreehandBrush {
     private _points: Point[] = [];
@@ -79,14 +80,18 @@ export class FreehandBrush {
         this._canvas.style.width = `${width}px`;
         this._canvas.style.height = `${height}px`;
 
-        const renderPoints =
-            this._options.type === 'material'
-                ? updateMaterialRenderPoints(this._points, this._renderedPoints, this._options)
-                : updateSmoothAndSimplifiedRenderPoints(
-                      this._points,
-                      this._renderedPoints,
-                      this._options
-                  );
+        const useMaterialPoints =
+            (this._options.type === 'material' &&
+                this._options.material?.repeatMode === 'incompact-size') ||
+            this._options.type === 'felt-tip-marker' ||
+            this._options.type === 'beads';
+        const renderPoints = useMaterialPoints
+            ? updateMaterialRenderPoints(this._points, this._renderedPoints, this._options)
+            : updateSmoothAndSimplifiedRenderPoints(
+                  this._points,
+                  this._renderedPoints,
+                  this._options
+              );
         this._renderedPoints.clear();
         renderPoints.forEach((point, index) => {
             this._renderedPoints.set(getPointKey(index, point), point);
@@ -102,6 +107,8 @@ export class FreehandBrush {
             renderMaterial(context, renderPoints, this._options);
         } else if (this._options.type === 'ink') {
             renderInk(context, renderPoints, this._options);
+        } else {
+            renderUnique(context, renderPoints, this._options);
         }
         context.restore();
 
