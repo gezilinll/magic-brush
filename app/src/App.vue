@@ -368,7 +368,7 @@ const brushType = ref('material');
 const isLoading = ref(true);
 const isDrawing = ref(false);
 const selectedButtonIndex = ref(0);
-const simplifyPoints = ref(0.5);
+const simplifyPoints = ref(0.1);
 const size = ref(36);
 const container: Ref<HTMLDivElement | null> = ref(null);
 
@@ -377,14 +377,14 @@ const materialBrushStyles: (MaterialBrushOptions & { src: string })[] = [
     { src: 'mb_style1.png', img: null!, repeatMode: 'compact' },
     { src: 'mb_style2.png', img: null!, repeatMode: 'compact' },
     { src: 'mb_style3.png', img: null!, repeatMode: 'compact' },
-    { src: 'mb_style4.png', img: null!, repeatMode: 'compact' },
+    { src: 'mb_style4.png', img: null!, repeatMode: 'incompact-fixed' },
     { src: 'mb_style5.png', img: null!, repeatMode: 'incompact-size' },
     { src: 'mb_style6.png', img: null!, repeatMode: 'incompact-size' },
     { src: 'mb_style7.png', img: null!, repeatMode: 'incompact-size' },
-    { src: 'mb_style8.png', img: null!, repeatMode: 'incompact-size' },
+    { src: 'mb_style8.png', img: null!, repeatMode: 'compact' },
     { src: 'mb_style9.png', img: null!, repeatMode: 'compact' },
     { src: 'mb_style10.png', img: null!, repeatMode: 'incompact-size' },
-    { src: 'mb_style11.png', img: null!, repeatMode: 'incompact-fixed' },
+    { src: 'mb_style11.png', img: null!, repeatMode: 'incompact-size' },
     { src: 'mb_style12.png', img: null!, repeatMode: 'incompact-size' },
     { src: 'mb_style13.png', img: null!, repeatMode: 'incompact-size' },
     { src: 'mb_style14.png', img: null!, repeatMode: 'incompact-size' },

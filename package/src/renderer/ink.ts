@@ -23,7 +23,8 @@ export function updateSmoothAndSimplifiedRenderPoints(
     _cached: Map<string, RenderPoint>,
     options: BrushPotions
 ): RenderPoint[] {
-    const strokePoints = getStroke(points, {
+    const simplifyPoints = simplify(points, options.simplifyPoints || 0.1);
+    const strokePoints = getStroke(simplifyPoints, {
         simulatePressure: true,
         size: options.type === 'ink' ? options.size : 1,
         thinning: options.ink?.thinning,
@@ -49,14 +50,9 @@ export function updateSmoothAndSimplifiedRenderPoints(
               }
             : undefined,
     });
-    const simplifyPoints = simplify(
-        strokePoints.map((point) => {
-            return { x: point[0], y: point[1] };
-        }),
-        options.simplifyPoints || 0.1
-    );
-    return simplifyPoints.map((point) => {
-        return { ...point, rendered: false, angle: [], offsetX: [], offsetY: [] };
+
+    return strokePoints.map((point) => {
+        return { x: point[0], y: point[1], rendered: false, angle: [], offsetX: [], offsetY: [] };
     });
 }
 
