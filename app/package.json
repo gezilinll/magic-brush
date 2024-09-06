@@ -11,7 +11,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "magic-freehand": "workspace:*"
+        "magic-brush": "workspace:*"
     },
     "devDependencies": {}
 }

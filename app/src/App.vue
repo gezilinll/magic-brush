@@ -374,7 +374,7 @@
 
 <script setup lang="ts">
 import { throttle } from 'lodash';
-import { BrushPotions, FreehandBrush, InkBrushOptions, MaterialBrushOptions } from 'magic-freehand';
+import { BrushPotions, FreehandBrush, InkBrushOptions, MaterialBrushOptions } from 'magic-brush';
 import { onMounted, Ref, ref, watch } from 'vue';
 
 declare type BrushElement = { brush: FreehandBrush; initLeft: number; initTop: number };

@@ -1,5 +1,5 @@
 {
-    "name": "magic-freehand-repo",
+    "name": "magic-brush-repo",
     "version": "1.0.0",
     "description": "",
     "workspaces": [
@@ -32,7 +32,7 @@
         "vue-eslint-parser": "^9.4.2"
     },
     "dependencies": {
-        "magic-freehand": "workspace:*",
+        "magic-brush": "workspace:*",
         "lodash": "^4.17.21",
         "vue": "^3.4.21"
     }

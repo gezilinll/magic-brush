@@ -11,7 +11,7 @@ importers:
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
-      magic-freehand:
+      magic-brush:
         specifier: workspace:*
         version: link:package
       vue:
@@ -63,7 +63,7 @@ importers:
 
   app:
     dependencies:
-      magic-freehand:
+      magic-brush:
         specifier: workspace:*
         version: link:../package
 
