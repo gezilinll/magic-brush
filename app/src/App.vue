@@ -7,6 +7,17 @@
         @mouseup="stopDrawing"
     >
         <div ref="container" class="app"></div>
+        <button
+            style="
+                position: absolute;
+                right: 36px;
+                bottom: 36px;
+                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+            "
+            @click="clear()"
+        >
+            Clear
+        </button>
         <div
             class="control-container"
             :style="{
@@ -379,7 +390,7 @@ import { onMounted, Ref, ref, watch } from 'vue';
 
 declare type BrushElement = { brush: FreehandBrush; initLeft: number; initTop: number };
 
-const elements: BrushElement[] = [];
+let elements: BrushElement[] = [];
 let currentElement: BrushElement | null = null;
 const brushType = ref('material');
 const isLoading = ref(true);
@@ -544,6 +555,13 @@ async function drawing(event: MouseEvent) {
 function stopDrawing() {
     currentElement = null;
     isDrawing.value = false;
+}
+
+function clear() {
+    elements.forEach((element) => {
+        container.value!.removeChild(element.brush.canvas);
+    });
+    elements = [];
 }
 
 watch(
