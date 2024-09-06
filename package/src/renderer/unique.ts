@@ -1,6 +1,6 @@
 import { BrushPotions } from '..';
 import { RenderPoint } from '../common/point';
-import { distanceBetween2Points, lerp } from '../common/utils';
+import { distanceBetween2Points, getRandomFloat, lerp } from '../common/utils';
 
 export function randomColor() {
     return (
@@ -30,6 +30,8 @@ export function renderUnique(
         renderSplatterPoints(context, points, options);
     } else if (options.type === 'hatching') {
         renderHatching(context, points, options);
+    } else if (options.type === 'spray') {
+        renderSpray(context, points, options);
     }
 }
 
@@ -213,6 +215,37 @@ export function renderHatching(
             context.moveTo(x - vectorX, y - vectorY);
             context.lineTo(x + vectorX, y + vectorY);
             context.stroke();
+        }
+    }
+}
+
+export function renderSpray(
+    context: CanvasRenderingContext2D,
+    points: RenderPoint[],
+    options: BrushPotions
+) {
+    for (let index = 1; index < points.length; index++) {
+        const prePoint = points[index - 1];
+        const point = points[index];
+
+        context.fillStyle = 'rgba(0, 0, 0, 1)';
+        const speed = Math.abs(point.x - prePoint.x) + Math.abs(point.y - prePoint.y);
+        const minRadius = options.size / 2;
+        const sprayDensity = 10;
+        const r = speed + minRadius;
+        const rSquared = r * r;
+
+        const lerps = 10;
+        for (let i = 0; i < lerps; i++) {
+            const lerpX = lerp(point.x, prePoint.x, i / lerps);
+            const lerpY = lerp(point.y, prePoint.y, i / lerps);
+            for (let j = 0; j < sprayDensity; j++) {
+                const randX = getRandomFloat(-r, r);
+                const randY = getRandomFloat(-1, 1) * Math.sqrt(rSquared - randX * randX);
+                context.beginPath();
+                context.arc(lerpX + randX, lerpY + randY, 1, 0, Math.PI * 2);
+                context.fill();
+            }
         }
     }
 }

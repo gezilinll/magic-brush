@@ -89,7 +89,8 @@ export class FreehandBrush {
             this._options.type === 'tangents' ||
             this._options.type === 'filling-gaps' ||
             this._options.type === 'splatter-points' ||
-            this._options.type === 'hatching';
+            this._options.type === 'hatching' ||
+            this._options.type === 'spray';
         const renderPoints = useMaterialPoints
             ? updateMaterialRenderPoints(this._points, this._renderedPoints, this._options)
             : updateSmoothAndSimplifiedRenderPoints(

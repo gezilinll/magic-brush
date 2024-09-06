@@ -8,13 +8,15 @@ import { Easing, EASINGS } from '../easing';
 
 function getHardLightResult(options: BrushPotions) {
     const canvas = document.createElement('canvas');
-    canvas.width = options.ink.fillImage.width;
-    canvas.height = options.ink.fillImage.height;
+    // @ts-expect-error ignore
+    canvas.width = options.ink!.fillImg!.width;
+    // @ts-expect-error ignore
+    canvas.height = options.ink!.fillImg!.height;
     const ctx = canvas.getContext('2d')!;
-    ctx.fillStyle = options.ink.fillColor;
+    ctx.fillStyle = options.ink!.fillColor!;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.globalCompositeOperation = options.ink.blendMode;
-    ctx.drawImage(options.ink.fillImage, 0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = options.ink!.blendMode!;
+    ctx.drawImage(options.ink!.fillImg!, 0, 0, canvas.width, canvas.height);
     return canvas;
 }
 

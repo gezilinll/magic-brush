@@ -9,7 +9,8 @@ export declare type BrushType =
     | 'tangents'
     | 'filling-gaps'
     | 'splatter-points'
-    | 'hatching';
+    | 'hatching'
+    | 'spray';
 
 export interface MaterialBrushOptions {
     img: CanvasImageSource;

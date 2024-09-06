@@ -447,6 +447,7 @@ const toyBrushStyles: any[] = [
     { src: 'filling-gaps.jpg', type: 'filling-gaps' },
     { src: 'splatter-points.jpg', type: 'splatter-points' },
     { src: 'hatching.jpg', type: 'hatching' },
+    { src: 'spray.jpg', type: 'spray' },
 ];
 
 let options: BrushPotions = getOptions();
@@ -463,7 +464,7 @@ function getBrushOptions(): MaterialBrushOptions | InkBrushOptions | null {
         return {
             fillType: inkBrushStyles[selectedButtonIndex.value].fillType,
             fillColor: fillColor.value,
-            fillImage: inkBrushStyles[selectedButtonIndex.value].fillImg,
+            fillImg: inkBrushStyles[selectedButtonIndex.value].fillImg,
             blendMode: blendMode.value,
             fillSize: size.value,
             thinning: thinning.value,
@@ -547,7 +548,7 @@ watch(
             brushType.value === 'toy' &&
             (selectedButtonIndex.value === 3 ||
                 selectedButtonIndex.value === 5 ||
-                selectedButtonIndex.value === 6)
+                selectedButtonIndex.value === 7)
         ) {
             size.value = 8;
         }
