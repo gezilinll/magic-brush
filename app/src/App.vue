@@ -13,7 +13,7 @@
                 pointerEvents: isDrawing ? 'none' : 'auto',
                 userSelect: isDrawing ? 'none' : 'auto',
                 height:
-                    brushType === 'material' ? '530px' : brushType === 'ink' ? '660px' : '350px',
+                    brushType === 'material' ? '530px' : brushType === 'ink' ? '660px' : '410px',
             }"
         >
             <div class="buttons">
@@ -127,7 +127,7 @@
                             ? '260px'
                             : brushType === 'ink' && selectedButtonIndex < 5
                             ? '160px'
-                            : '120px',
+                            : '190px',
                 }"
             >
                 <div class="adjustments">
@@ -448,6 +448,10 @@ const toyBrushStyles: any[] = [
     { src: 'splatter-points.jpg', type: 'splatter-points' },
     { src: 'hatching.jpg', type: 'hatching' },
     { src: 'spray.jpg', type: 'spray' },
+    { src: 'circles.jpg', type: 'circles' },
+    { src: 'grid.jpg', type: 'grid' },
+    { src: 'colored-pixels.jpg', type: 'colored-pixels' },
+    { src: 'squares.jpg', type: 'squares' },
 ];
 
 let options: BrushPotions = getOptions();

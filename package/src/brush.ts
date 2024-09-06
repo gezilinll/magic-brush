@@ -80,24 +80,17 @@ export class FreehandBrush {
         this._canvas.style.width = `${width}px`;
         this._canvas.style.height = `${height}px`;
 
-        const useMaterialPoints =
+        const useFreehandPoints =
             (this._options.type === 'material' &&
-                this._options.material?.repeatMode === 'incompact-size') ||
-            this._options.type === 'felt-tip-marker' ||
-            this._options.type === 'beads' ||
-            this._options.type === 'flip-wiggle' ||
-            this._options.type === 'tangents' ||
-            this._options.type === 'filling-gaps' ||
-            this._options.type === 'splatter-points' ||
-            this._options.type === 'hatching' ||
-            this._options.type === 'spray';
-        const renderPoints = useMaterialPoints
-            ? updateMaterialRenderPoints(this._points, this._renderedPoints, this._options)
-            : updateSmoothAndSimplifiedRenderPoints(
+                this._options.material?.repeatMode !== 'incompact-size') ||
+            this._options.type === 'ink';
+        const renderPoints = useFreehandPoints
+            ? updateSmoothAndSimplifiedRenderPoints(
                   this._points,
                   this._renderedPoints,
                   this._options
-              );
+              )
+            : updateMaterialRenderPoints(this._points, this._renderedPoints, this._options);
         this._renderedPoints.clear();
         renderPoints.forEach((point, index) => {
             this._renderedPoints.set(getPointKey(index, point), point);

@@ -1,6 +1,6 @@
 import { BrushPotions } from '..';
 import { RenderPoint } from '../common/point';
-import { distanceBetween2Points, getRandomFloat, lerp } from '../common/utils';
+import { distanceBetween2Points, getRandomFloat, getRandomInt, lerp } from '../common/utils';
 
 export function randomColor() {
     return (
@@ -32,6 +32,14 @@ export function renderUnique(
         renderHatching(context, points, options);
     } else if (options.type === 'spray') {
         renderSpray(context, points, options);
+    } else if (options.type === 'circles') {
+        renderCircles(context, points, options);
+    } else if (options.type === 'grid') {
+        renderGrid(context, points, options);
+    } else if (options.type === 'colored-pixels') {
+        renderColoredPixels(context, points, options);
+    } else if (options.type === 'squares') {
+        renderSquares(context, points, options);
     }
 }
 
@@ -247,5 +255,137 @@ export function renderSpray(
                 context.fill();
             }
         }
+    }
+}
+
+export function renderCircles(
+    context: CanvasRenderingContext2D,
+    points: RenderPoint[],
+    _options: BrushPotions
+) {
+    for (let index = 1; index < points.length; index++) {
+        const prePoint = points[index - 1];
+        const point = points[index];
+
+        const dx = point.x - prePoint.x;
+        const dy = point.y - prePoint.y;
+        const d = Math.sqrt(dx * dx + dy * dy) * 2;
+
+        const cx = Math.floor(point.x / 100) * 100 + 5;
+        const cy = Math.floor(point.y / 100) * 100 + 5;
+
+        const alpha = point.attachData ? point.attachData.alpha : Math.random() + 0.1;
+        const steps = point.attachData ? point.attachData.steps : Math.floor(Math.random() * 10);
+        const stepDelta = d / steps;
+
+        context.strokeStyle = 'rgb(255, 120, 0)';
+        context.globalAlpha = alpha;
+        for (let i = 0; i < steps; i++) {
+            context.beginPath();
+            context.arc(cx, cy, (steps - i) * stepDelta, 0, Math.PI * 2, true);
+            context.stroke();
+        }
+
+        point.attachData = point.attachData ?? {};
+        point.attachData.alpha = alpha;
+        point.attachData.steps = steps;
+    }
+}
+
+export function renderGrid(
+    context: CanvasRenderingContext2D,
+    points: RenderPoint[],
+    _options: BrushPotions
+) {
+    for (let index = 0; index < points.length; index++) {
+        const point = points[index];
+        const cx = Math.round(point.x / 100) * 100;
+        const cy = Math.round(point.y / 100) * 100;
+        const dx = (cx - point.x) * 10;
+        const dy = (cy - point.y) * 10;
+        context.globalAlpha = 0.01;
+        const randomX: number = point.attachData ? point.attachData.randomX : Math.random();
+        const randomY: number = point.attachData ? point.attachData.randomY : Math.random();
+        for (let i = 0; i < 10; i++) {
+            context.beginPath();
+            context.moveTo(cx, cy);
+            context.quadraticCurveTo(point.x + randomX * dx, point.y + randomY * dy, cx, cy);
+            context.stroke();
+        }
+        point.attachData = point.attachData ?? {};
+        point.attachData.randomX = randomX;
+        point.attachData.randomY = randomY;
+    }
+}
+
+export function renderColoredPixels(
+    context: CanvasRenderingContext2D,
+    points: RenderPoint[],
+    _options: BrushPotions
+) {
+    for (let index = 0; index < points.length; index++) {
+        const point = points[index];
+        const fillPoints: { x: number; y: number; color: string }[] = point.attachData
+            ? point.attachData.fillPoints
+            : [];
+        if (fillPoints.length > 0) {
+            fillPoints.forEach((p) => {
+                context.fillStyle = p.color;
+                context.fillRect(p.x, p.y, 4, 4);
+            });
+        } else {
+            for (let i = -10; i < 10; i += 4) {
+                for (let j = -10; j < 10; j += 4) {
+                    if (Math.random() > 0.5) {
+                        context.fillStyle = [
+                            'red',
+                            'orange',
+                            'yellow',
+                            'green',
+                            'light-blue',
+                            'blue',
+                            'purple',
+                        ][getRandomInt(0, 6)];
+                        const x = points[index].x + i;
+                        const y = points[index].y + j;
+                        context.fillRect(x, y, 4, 4);
+                        fillPoints.push({ x, y, color: context.fillStyle });
+                    }
+                }
+            }
+        }
+
+        point.attachData = point.attachData ?? {};
+        point.attachData.fillPoints = fillPoints;
+    }
+}
+
+export function renderSquares(
+    context: CanvasRenderingContext2D,
+    points: RenderPoint[],
+    _options: BrushPotions
+) {
+    for (let index = 1; index < points.length; index++) {
+        const prePoint = points[index - 1];
+        const point = points[index];
+
+        const dx = point.x - prePoint.x;
+        const dy = point.y - prePoint.y;
+        const angle = 1.57079633;
+        const px = Math.cos(angle) * dx - Math.sin(angle) * dy;
+        const py = Math.sin(angle) * dx + Math.cos(angle) * dy;
+
+        context.lineWidth = 1;
+        context.fillStyle = 'rgb(255, 120, 0)';
+        context.strokeStyle = 'rgb(200, 210, 66)';
+
+        context.beginPath();
+        context.moveTo(prePoint.x - px, prePoint.y - py);
+        context.lineTo(prePoint.x + px, prePoint.y + py);
+        context.lineTo(point.x + px, point.y + py);
+        context.lineTo(point.x - px, point.y - py);
+        context.lineTo(prePoint.x - px, prePoint.y - py);
+        context.fill();
+        context.stroke();
     }
 }

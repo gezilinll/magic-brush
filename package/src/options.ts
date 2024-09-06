@@ -10,7 +10,12 @@ export declare type BrushType =
     | 'filling-gaps'
     | 'splatter-points'
     | 'hatching'
-    | 'spray';
+    | 'spray'
+    | 'sketchy'
+    | 'circles'
+    | 'grid'
+    | 'colored-pixels'
+    | 'squares';
 
 export interface MaterialBrushOptions {
     img: CanvasImageSource;
