@@ -12,6 +12,8 @@ export function updateMaterialRenderPoints(
     cached: Map<string, RenderPoint>,
     _options: BrushPotions
 ): RenderPoint[] {
+    // smooth?
+    // https://library.superhi.com/posts/how-to-paint-with-code-creating-paintbrushes#:~:text=Filling%20in%20the%20gaps%20between%20points
     const result: RenderPoint[] = [];
     points.forEach((point, index) => {
         const key = getPointKey(index, point);

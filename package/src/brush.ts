@@ -84,7 +84,12 @@ export class FreehandBrush {
             (this._options.type === 'material' &&
                 this._options.material?.repeatMode === 'incompact-size') ||
             this._options.type === 'felt-tip-marker' ||
-            this._options.type === 'beads';
+            this._options.type === 'beads' ||
+            this._options.type === 'flip-wiggle' ||
+            this._options.type === 'tangents' ||
+            this._options.type === 'filling-gaps' ||
+            this._options.type === 'splatter-points' ||
+            this._options.type === 'hatching';
         const renderPoints = useMaterialPoints
             ? updateMaterialRenderPoints(this._points, this._renderedPoints, this._options)
             : updateSmoothAndSimplifiedRenderPoints(
@@ -116,9 +121,13 @@ export class FreehandBrush {
     }
 
     private _updateRealBBox() {
-        this._realBBox.left = this._pointsBBox.left - this._options.size / 2;
-        this._realBBox.right = this._pointsBBox.right + this._options.size / 2;
-        this._realBBox.top = this._pointsBBox.top - this._options.size / 2;
-        this._realBBox.bottom = this._pointsBBox.bottom + this._options.size / 2;
+        const offset =
+            this._options.type !== 'material' && this._options.type !== 'ink'
+                ? this._options.size * 20
+                : 0;
+        this._realBBox.left = this._pointsBBox.left - this._options.size / 2 - offset;
+        this._realBBox.right = this._pointsBBox.right + this._options.size / 2 + offset;
+        this._realBBox.top = this._pointsBBox.top - this._options.size / 2 - offset;
+        this._realBBox.bottom = this._pointsBBox.bottom + this._options.size / 2 + offset;
     }
 }

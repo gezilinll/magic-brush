@@ -102,6 +102,8 @@
         "dppx",
         "EASINGS",
         "incompact",
+        "lerp",
+        "lerps",
         "uuidv"
     ]
 }

@@ -442,11 +442,16 @@ const capEnd = ref(true);
 const toyBrushStyles: any[] = [
     { src: 'felt-tip-marker.jpg', type: 'felt-tip-marker' },
     { src: 'beads.jpg', type: 'beads' },
+    { src: 'flip-wiggle.jpg', type: 'flip-wiggle' },
+    { src: 'tangents.jpg', type: 'tangents' },
+    { src: 'filling-gaps.jpg', type: 'filling-gaps' },
+    { src: 'splatter-points.jpg', type: 'splatter-points' },
+    { src: 'hatching.jpg', type: 'hatching' },
 ];
 
 let options: BrushPotions = getOptions();
 
-function getBrushOptions(): MaterialBrushOptions | InkBrushOptions {
+function getBrushOptions(): MaterialBrushOptions | InkBrushOptions | null {
     if (brushType.value === 'material') {
         return {
             ...materialBrushStyles[selectedButtonIndex.value],
@@ -454,7 +459,7 @@ function getBrushOptions(): MaterialBrushOptions | InkBrushOptions {
             maxRandomOffset: maxRandomOffset.value,
             fixedOffset: fixedOffset.value,
         };
-    } else {
+    } else if (brushType.value === 'ink') {
         return {
             fillType: inkBrushStyles[selectedButtonIndex.value].fillType,
             fillColor: fillColor.value,
@@ -477,6 +482,7 @@ function getBrushOptions(): MaterialBrushOptions | InkBrushOptions {
             },
         } as InkBrushOptions;
     }
+    return null;
 }
 
 function getOptions() {
@@ -537,6 +543,17 @@ function stopDrawing() {
 watch(
     () => selectedButtonIndex.value,
     () => {
+        if (
+            brushType.value === 'toy' &&
+            (selectedButtonIndex.value === 3 ||
+                selectedButtonIndex.value === 5 ||
+                selectedButtonIndex.value === 6)
+        ) {
+            size.value = 8;
+        }
+        if (brushType.value === 'toy' && selectedButtonIndex.value === 6) {
+            size.value = 1;
+        }
         options = getOptions();
     },
     { immediate: true }
