@@ -1,7 +1,7 @@
 <template>
     <div
         id="app"
-        style="position: absolute; background-color: rgb(248, 249, 250)"
+        style="position: absolute; background-color: rgb(233, 235, 237)"
         @mousedown="startDrawing"
         @mousemove="drawing"
         @mouseup="stopDrawing"
@@ -405,6 +405,7 @@ const materialBrushStyles: (MaterialBrushOptions & { src: string })[] = [
     { src: 'mb_style12.png', img: null!, repeatMode: 'incompact-size' },
     { src: 'mb_style13.png', img: null!, repeatMode: 'incompact-size' },
     { src: 'mb_style14.png', img: null!, repeatMode: 'incompact-size' },
+    { src: 'mb_style15.png', img: null!, repeatMode: 'compact' },
 ];
 const fixedOffset = ref(3);
 const minRandomOffset = ref(-3);
