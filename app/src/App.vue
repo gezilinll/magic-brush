@@ -380,6 +380,9 @@
                 </div>
             </div>
         </div>
+        <span style="position: absolute; left: 40%; top: 40%; font-size: 66px" v-if="isLoading"
+            >{{ loadingStatus }}
+        </span>
     </div>
 </template>
 
@@ -394,6 +397,7 @@ let elements: BrushElement[] = [];
 let currentElement: BrushElement | null = null;
 const brushType = ref('material');
 const isLoading = ref(true);
+const loadingStatus = ref('Loading...');
 const isDrawing = ref(false);
 const selectedButtonIndex = ref(0);
 const simplifyPoints = ref(0.1);
@@ -616,12 +620,23 @@ watch(
     }
 );
 
+let loadedIndex = 0;
+let animationId = 0;
+const totalLoadCount = materialBrushStyles.length + inkBrushStyles.length + toyBrushStyles.length;
+function updateLoadingStatus() {
+    loadingStatus.value = 'Loading...' + ((loadedIndex / totalLoadCount) * 100).toFixed(2) + '%';
+    animationId = requestAnimationFrame(updateLoadingStatus);
+}
+
 onMounted(async () => {
+    animationId = requestAnimationFrame(updateLoadingStatus);
+
     const loadImage = (src: string) => {
         return new Promise((resolve, reject) => {
             const img = new Image();
             img.src = src;
 
+            loadedIndex++;
             img.onload = () => resolve(img);
             img.onerror = reject;
         });
@@ -647,9 +662,18 @@ onMounted(async () => {
             console.error(`Failed to load image: ${style.src}`);
         }
     });
+    const loadToyPromises = toyBrushStyles.map(async (style) => {
+        try {
+            await loadImage(style.src);
+        } catch (error) {
+            console.error(`Failed to load image: ${style.src}`);
+        }
+    });
     await Promise.all(loadMaterialPromises);
     await Promise.all(loadInkPromises);
+    await Promise.all(loadToyPromises);
 
+    cancelAnimationFrame(animationId);
     options = getOptions();
     isLoading.value = false;
 });
