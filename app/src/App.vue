@@ -636,7 +636,6 @@ onMounted(async () => {
             const img = new Image();
             img.src = src;
 
-            loadedIndex++;
             img.onload = () => resolve(img);
             img.onerror = reject;
         });
@@ -650,6 +649,8 @@ onMounted(async () => {
             }
         } catch (error) {
             console.error(`Failed to load image: ${style.src}`);
+        } finally {
+            loadedIndex++;
         }
     });
     const loadInkPromises = inkBrushStyles.map(async (style) => {
@@ -660,6 +661,8 @@ onMounted(async () => {
             }
         } catch (error) {
             console.error(`Failed to load image: ${style.src}`);
+        } finally {
+            loadedIndex++;
         }
     });
     const loadToyPromises = toyBrushStyles.map(async (style) => {
@@ -667,6 +670,8 @@ onMounted(async () => {
             await loadImage(style.src);
         } catch (error) {
             console.error(`Failed to load image: ${style.src}`);
+        } finally {
+            loadedIndex++;
         }
     });
     await Promise.all(loadMaterialPromises);
