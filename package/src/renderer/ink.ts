@@ -6,7 +6,7 @@ import { RenderPoint } from '../common/point';
 import { midPointBtw } from '../common/utils';
 import { Easing, EASINGS } from '../easing';
 
-function getHardLightResult(options: BrushPotions) {
+function getBlendResult(options: BrushPotions) {
     const canvas = document.createElement('canvas');
     // @ts-expect-error ignore
     canvas.width = options.ink!.fillImg!.width;
@@ -72,12 +72,12 @@ export function renderInk(
     options: BrushPotions
 ) {
     context.lineJoin = context.lineCap = 'round';
-    if (options.ink.fillType === 'color') {
-        context.fillStyle = options.ink.fillColor!;
-    } else if (options.ink.fillType === 'image') {
-        context.fillStyle = options.ink.blendMode
-            ? context.createPattern(getHardLightResult(options), 'repeat')!
-            : context.createPattern(options.ink.fillImage!, 'repeat')!;
+    if (options.ink!.fillType === 'color') {
+        context.fillStyle = options.ink!.fillColor!;
+    } else if (options.ink!.fillType === 'image') {
+        context.fillStyle = options.ink!.blendMode
+            ? context.createPattern(getBlendResult(options), 'repeat')!
+            : context.createPattern(options.ink!.fillImg!, 'repeat')!;
     }
 
     context.beginPath();
