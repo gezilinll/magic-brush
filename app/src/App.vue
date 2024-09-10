@@ -5,6 +5,42 @@
         @mousedown="startDrawing"
         @mousemove="drawing"
         @mouseup="stopDrawing"
+        @touchstart="
+            (event) => {
+                if (event.touches[0].pageX < 300 || isLoading) {
+                    return;
+                }
+                startDrawing(event.touches[0]);
+                event.preventDefault();
+            }
+        "
+        @touchmove="
+            (event) => {
+                if (!isDrawing) {
+                    return;
+                }
+                drawing(event.touches[0]);
+                event.preventDefault();
+            }
+        "
+        @touchend="
+            (event) => {
+                if (!isDrawing) {
+                    return;
+                }
+                stopDrawing(event.touches[0]);
+                event.preventDefault();
+            }
+        "
+        @touchcancel="
+            (event) => {
+                if (!isDrawing) {
+                    return;
+                }
+                stopDrawing(event.touches[0]);
+                event.preventDefault();
+            }
+        "
     >
         <div ref="container" class="app"></div>
         <button
@@ -520,19 +556,22 @@ function getOptions() {
     } as BrushPotions;
 }
 
-function startDrawing(event: MouseEvent) {
-    if (event.offsetX < 300 || isLoading.value) {
+function startDrawing(event: MouseEvent | Touch) {
+    if (event.pageX < 300 || isLoading.value) {
         return;
     }
     isDrawing.value = true;
     currentElement = {
         brush: new FreehandBrush(options),
-        initLeft: event.offsetX,
-        initTop: event.offsetY,
+        initLeft: event.pageX,
+        initTop: event.pageY,
     };
     elements.push(currentElement);
     currentElement.brush.canvas.style.position = 'absolute';
     container.value!.appendChild(currentElement.brush.canvas);
+    if (event instanceof MouseEvent) {
+        event.preventDefault();
+    }
 }
 
 const drawBrush = throttle((element: BrushElement, x: number, y: number) => {
@@ -545,20 +584,26 @@ const drawBrush = throttle((element: BrushElement, x: number, y: number) => {
     result.style.top = `${element.initTop + element.brush.top}px`;
     element.brush.draw();
 }, 10);
-async function drawing(event: MouseEvent) {
+async function drawing(event: MouseEvent | Touch) {
     if (!isDrawing.value) {
         return;
     }
     drawBrush(
         currentElement!,
-        event.offsetX - currentElement!.initLeft,
-        event.offsetY - currentElement!.initTop
+        event.pageX - currentElement!.initLeft,
+        event.pageY - currentElement!.initTop
     );
+    if (event instanceof MouseEvent) {
+        event.preventDefault();
+    }
 }
 
-function stopDrawing() {
+function stopDrawing(event: MouseEvent | Touch) {
     currentElement = null;
     isDrawing.value = false;
+    if (event instanceof MouseEvent) {
+        event.preventDefault();
+    }
 }
 
 function clear() {
