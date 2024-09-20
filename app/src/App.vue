@@ -60,7 +60,13 @@
                 pointerEvents: isDrawing ? 'none' : 'auto',
                 userSelect: isDrawing ? 'none' : 'auto',
                 height:
-                    brushType === 'material' ? '530px' : brushType === 'ink' ? '660px' : '410px',
+                    brushType === 'material'
+                        ? isMaterialSupportColor
+                            ? '630px'
+                            : '530px'
+                        : brushType === 'ink'
+                        ? '660px'
+                        : '410px',
             }"
         >
             <div class="buttons">
@@ -121,8 +127,12 @@
                 ></button>
             </div>
             <div
-                style="position: absolute; margin-top: 230px; margin-left: 16px"
-                v-if="brushType === 'ink'"
+                :style="{
+                    position: 'absolute',
+                    marginTop: brushType === 'ink' ? '230px' : '450px',
+                    marginLeft: '16px',
+                }"
+                v-if="brushType === 'ink' || isMaterialSupportColor"
             >
                 <button
                     v-for="color in colors"
@@ -179,7 +189,12 @@
             >
                 <div class="adjustments">
                     <div
-                        style="width: 90%; height: 1px; background-color: black; margin-top: 10px"
+                        :style="{
+                            width: '90%',
+                            height: '1px',
+                            backgroundColor: 'black',
+                            marginTop: isMaterialSupportColor ? '80px' : '10px',
+                        }"
                     ></div>
                     <div
                         class="adjustment-control"
@@ -425,7 +440,7 @@
 <script setup lang="ts">
 import { throttle } from 'lodash';
 import { BrushPotions, FreehandBrush, InkBrushOptions, MaterialBrushOptions } from 'magic-brush';
-import { onMounted, Ref, ref, watch } from 'vue';
+import { computed, onMounted, Ref, ref, watch } from 'vue';
 
 declare type BrushElement = { brush: FreehandBrush; initLeft: number; initTop: number };
 
@@ -505,6 +520,20 @@ const toyBrushStyles: any[] = [
     { src: 'colored-pixels.jpg', type: 'colored-pixels' },
     { src: 'squares.jpg', type: 'squares' },
 ];
+const isMaterialSupportColor = computed(() => {
+    return (
+        brushType.value === 'material' &&
+        (selectedButtonIndex.value === 4 ||
+            selectedButtonIndex.value === 5 ||
+            selectedButtonIndex.value === 6 ||
+            selectedButtonIndex.value === 9 ||
+            selectedButtonIndex.value === 10 ||
+            selectedButtonIndex.value === 11 ||
+            selectedButtonIndex.value === 12 ||
+            selectedButtonIndex.value === 13 ||
+            selectedButtonIndex.value === 14)
+    );
+});
 
 let options: BrushPotions = getOptions();
 
@@ -515,6 +544,8 @@ function getBrushOptions(): MaterialBrushOptions | InkBrushOptions | null {
             minRandomOffset: minRandomOffset.value,
             maxRandomOffset: maxRandomOffset.value,
             fixedOffset: fixedOffset.value,
+            colorType: isMaterialSupportColor.value ? 'mask' : undefined,
+            maskColor: isMaterialSupportColor.value ? fillColor.value : undefined,
         };
     } else if (brushType.value === 'ink') {
         return {
@@ -782,6 +813,7 @@ button.active {
     width: 300px;
     margin-left: 16px;
     margin-top: 168px;
+    pointer-events: none;
 }
 
 .adjustment-control {
@@ -789,6 +821,7 @@ button.active {
     align-items: center;
     padding-top: 8px;
     margin-right: 32px;
+    pointer-events: auto;
 }
 
 .adjustment-control label {

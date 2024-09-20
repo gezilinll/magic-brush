@@ -33,11 +33,30 @@ export function updateMaterialRenderPoints(
     return result;
 }
 
+function getMaterial(options: BrushPotions) {
+    if (!options.material!.colorType) {
+        return options.material!.img;
+    }
+    const canvas = document.createElement('canvas');
+    // @ts-expect-error ignore
+    canvas.width = options.material!.img!.width;
+    // @ts-expect-error ignore
+    canvas.height = options.material!.img!.height;
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(options.material!.img!, 0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = 'source-in';
+    ctx.fillStyle = options.material!.maskColor!;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = 'source-over';
+    return canvas;
+}
+
 export function renderMaterial(
     context: CanvasRenderingContext2D,
     points: RenderPoint[],
     options: BrushPotions
 ) {
+    const material = getMaterial(options);
     const length = points.length;
     context.beginPath();
     context.moveTo(points[0].x, points[0].y);
@@ -85,7 +104,7 @@ export function renderMaterial(
                 context.rotate(resultAngle);
                 context.translate(-(x + options.size / 2), -(y + options.size / 2));
             }
-            context.drawImage(options.material!.img, x, y, options.size, options.size);
+            context.drawImage(material, x, y, options.size, options.size);
             context.restore();
             if (!start.rendered) {
                 start.angle.push(resultAngle);

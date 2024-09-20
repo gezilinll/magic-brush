@@ -23,6 +23,8 @@ export interface MaterialBrushOptions {
     minRandomOffset?: number;
     maxRandomOffset?: number;
     fixedOffset?: number;
+    colorType?: 'mask';
+    maskColor?: string;
 }
 
 export interface InkBrushOptions {
