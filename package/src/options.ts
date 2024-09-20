@@ -23,7 +23,7 @@ export interface MaterialBrushOptions {
     minRandomOffset?: number;
     maxRandomOffset?: number;
     fixedOffset?: number;
-    colorType?: 'mask';
+    colorType?: 'mask' | 'mask-grey';
     maskColor?: string;
 }
 

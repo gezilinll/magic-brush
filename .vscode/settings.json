@@ -104,6 +104,7 @@
         "incompact",
         "lerp",
         "lerps",
+        "tinycolor",
         "uuidv"
     ]
 }

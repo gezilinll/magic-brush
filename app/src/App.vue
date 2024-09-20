@@ -217,7 +217,7 @@
                     </div>
                     <div class="adjustment-control">
                         <label for="size">Size: </label>
-                        <input id="size" type="range" min="1" max="100" v-model.number="size" />
+                        <input id="size" type="range" min="1" max="500" v-model.number="size" />
                         <span>{{ size }}</span>
                     </div>
                     <div
@@ -233,7 +233,7 @@
                             id="size"
                             type="range"
                             :min="1"
-                            :max="10"
+                            :max="500"
                             v-model.number="fixedOffset"
                         />
                         <span>{{ fixedOffset }}</span>
@@ -470,7 +470,7 @@ const materialBrushStyles: (MaterialBrushOptions & { src: string })[] = [
     { src: 'mb_style11.png', img: null!, repeatMode: 'incompact-size' },
     { src: 'mb_style12.png', img: null!, repeatMode: 'incompact-size' },
     { src: 'mb_style13.png', img: null!, repeatMode: 'incompact-size' },
-    { src: 'mb_style14.png', img: null!, repeatMode: 'incompact-size' },
+    { src: 'mb_style14.png', img: null!, repeatMode: 'incompact-fixed' },
     { src: 'mb_style15.png', img: null!, repeatMode: 'compact' },
 ];
 const fixedOffset = ref(3);
@@ -530,8 +530,7 @@ const isMaterialSupportColor = computed(() => {
             selectedButtonIndex.value === 10 ||
             selectedButtonIndex.value === 11 ||
             selectedButtonIndex.value === 12 ||
-            selectedButtonIndex.value === 13 ||
-            selectedButtonIndex.value === 14)
+            selectedButtonIndex.value === 13)
     );
 });
 
@@ -544,7 +543,11 @@ function getBrushOptions(): MaterialBrushOptions | InkBrushOptions | null {
             minRandomOffset: minRandomOffset.value,
             maxRandomOffset: maxRandomOffset.value,
             fixedOffset: fixedOffset.value,
-            colorType: isMaterialSupportColor.value ? 'mask' : undefined,
+            colorType: isMaterialSupportColor.value
+                ? selectedButtonIndex.value === 13
+                    ? 'mask-grey'
+                    : 'mask'
+                : undefined,
             maskColor: isMaterialSupportColor.value ? fillColor.value : undefined,
         };
     } else if (brushType.value === 'ink') {
@@ -599,6 +602,11 @@ function startDrawing(event: MouseEvent | Touch) {
     };
     elements.push(currentElement);
     currentElement.brush.canvas.style.position = 'absolute';
+    drawBrush(
+        currentElement!,
+        event.pageX - currentElement!.initLeft,
+        event.pageY - currentElement!.initTop
+    );
     container.value!.appendChild(currentElement.brush.canvas);
     if (event instanceof MouseEvent) {
         event.preventDefault();

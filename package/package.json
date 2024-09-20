@@ -26,6 +26,10 @@
     "license": "ISC",
     "dependencies": {
         "perfect-freehand": "^1.2.2",
-        "simplify-js": "^1.2.4"
+        "simplify-js": "^1.2.4",
+        "tinycolor2": "^1.6.0"
+    },
+    "devDependencies": {
+        "@types/tinycolor2": "^1.4.6"
     }
 }

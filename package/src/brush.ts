@@ -81,7 +81,8 @@ export class FreehandBrush {
         this._canvas.style.height = `${height}px`;
 
         const useFreehandPoints =
-            (this._options.type === 'material' &&
+            (this._points.length > 2 &&
+                this._options.type === 'material' &&
                 this._options.material?.repeatMode !== 'incompact-size') ||
             this._options.type === 'ink';
         const renderPoints = useFreehandPoints
@@ -98,10 +99,13 @@ export class FreehandBrush {
 
         context.save();
         context.scale(dpr, dpr);
-        context.translate(
-            this._realBBox.left < 0 ? -this._realBBox.left : 0,
-            this._realBBox.top < 0 ? -this._realBBox.top : 0
-        );
+        if (this._renderedPoints.size > 1) {
+            context.translate(
+                this._realBBox.left < 0 ? -this._realBBox.left : 0,
+                this._realBBox.top < 0 ? -this._realBBox.top : 0
+            );
+        }
+
         if (this._options.type === 'material') {
             renderMaterial(context, renderPoints, this._options);
         } else if (this._options.type === 'ink') {
