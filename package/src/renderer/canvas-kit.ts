@@ -17,7 +17,7 @@ export class CanvasKitRenderer {
     private _lastY = 0;
     constructor(private canvas: HTMLCanvasElement) {
         this.canvas = canvas;
-        this._surface = canvasKit.MakeCanvasSurface(this.canvas)!;
+        this._surface = canvasKit.MakeSWCanvasSurface(this.canvas)!;
         if (!this._surface) {
             throw new Error('Failed to create a CanvasKit Surface');
         }
@@ -35,6 +35,21 @@ export class CanvasKitRenderer {
         return canvas;
     }
 
+    convertToPremultipliedAlpha(imageData: ImageData) {
+        const { data, width, height } = imageData;
+        const newData = new Uint8ClampedArray(data.length);
+
+        for (let i = 0; i < data.length; i += 4) {
+            const alpha = data[i + 3] / 255;
+            newData[i] = data[i] * alpha; // Red
+            newData[i + 1] = data[i + 1] * alpha; // Green
+            newData[i + 2] = data[i + 2] * alpha; // Blue
+            newData[i + 3] = data[i + 3]; // Alpha remains unchanged
+        }
+
+        return new ImageData(newData, width, height);
+    }
+
     render(image: CanvasImageSource, x: number, y: number, width: number, height: number) {
         const canvas = this._surface.getCanvas();
 
@@ -50,43 +65,57 @@ export class CanvasKitRenderer {
             ctx!.drawImage(image, 0, 0, srcWidth, srcHeight);
             image = tempCanvas;
         }
-        image = this.extendTextureEdges(image);
+        // image = this.extendTextureEdges(image);
         srcWidth = image.width;
         srcHeight = image.height;
+        const context = image.getContext('2d')!;
+        const imageData = context.getImageData(0, 0, srcWidth, srcHeight);
+        const premultipliedImageData = this.convertToPremultipliedAlpha(imageData);
+        const skImage = canvasKit.MakeImage(
+            {
+                width: srcWidth,
+                height: srcHeight,
+                colorType: canvasKit.ColorType.RGBA_8888, // RGBA 格式
+                alphaType: canvasKit.AlphaType.Premul, // 设置为预乘 Alpha
+                colorSpace: canvasKit.ColorSpace.SRGB,
+            },
+            premultipliedImageData.data,
+            premultipliedImageData.width * 4
+        )!;
 
         const paint = new canvasKit.Paint();
         paint.setAntiAlias(true);
 
-        const skImage = canvasKit.MakeImageFromCanvasImageSource(image);
+        // const skImage = canvasKit.MakeImageFromCanvasImageSource(image);
         skImage.makeCopyWithDefaultMipmaps();
 
-        // const shaderOptions = {
-        //     filter: canvasKit.FilterMode.Linear,
-        //     mipmap: canvasKit.MipmapMode.Linear,
-        //     tileModeX: canvasKit.TileMode.Clamp,
-        //     tileModeY: canvasKit.TileMode.Clamp,
-        // };
-        // const scaleX = this.canvas.width / skImage.width();
-        // const scaleY = this.canvas.height / skImage.height();
-        // const matrix = canvasKit.Matrix.scaled(scaleX, scaleX);
-        // const shader = skImage.makeShaderOptions(
-        //     shaderOptions.tileModeX,
-        //     shaderOptions.tileModeY,
-        //     shaderOptions.filter,
-        //     shaderOptions.mipmap,
-        //     matrix
-        // );
-        // paint.setShader(shader);
-        // canvas.drawRect([this._lastX, this._lastY, width, height], paint);
-
-        canvas.drawImageRectOptions(
-            skImage,
-            [0, 0, skImage.width(), skImage.height()],
-            [this._lastX, this._lastY, width, height],
-            canvasKit.FilterMode.Linear,
-            canvasKit.MipmapMode.Linear,
-            paint
+        const shaderOptions = {
+            filter: canvasKit.FilterMode.Linear,
+            mipmap: canvasKit.MipmapMode.Linear,
+            tileModeX: canvasKit.TileMode.Clamp,
+            tileModeY: canvasKit.TileMode.Clamp,
+        };
+        const scaleX = this.canvas.width / skImage.width();
+        const scaleY = this.canvas.height / skImage.height();
+        const matrix = canvasKit.Matrix.scaled(scaleX, scaleX);
+        const shader = skImage.makeShaderOptions(
+            shaderOptions.tileModeX,
+            shaderOptions.tileModeY,
+            shaderOptions.filter,
+            shaderOptions.mipmap,
+            matrix
         );
+        paint.setShader(shader);
+        canvas.drawRect([this._lastX, this._lastY, width, height], paint);
+
+        // canvas.drawImageRectOptions(
+        //     skImage,
+        //     [0, 0, skImage.width(), skImage.height()],
+        //     [this._lastX, this._lastY, width, height],
+        //     canvasKit.FilterMode.Linear,
+        //     canvasKit.MipmapMode.Linear,
+        //     paint
+        // );
         this._surface.flush();
 
         paint.delete();
