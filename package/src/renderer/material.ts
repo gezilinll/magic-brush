@@ -8,6 +8,7 @@ import {
     getRandomInt,
 } from '../common/utils';
 import { BrushPotions } from '../options';
+import { CanvasKitRenderer } from './canvas-kit';
 
 export function updateMaterialRenderPoints(
     points: Point[],
@@ -103,12 +104,14 @@ export function renderMaterial(
     options: BrushPotions
 ) {
     const material = getMaterial(options);
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = context.canvas.width;
+    tempCanvas.height = context.canvas.height;
+    const canvasKitRenderer = new CanvasKitRenderer(tempCanvas);
     const length = points.length;
-    context.beginPath();
     if (points.length === 1) {
-        context.drawImage(material, 0, 0, options.size, options.size);
+        canvasKitRenderer.render(material, 0, 0, options.size, options.size);
     } else {
-        context.moveTo(points[0].x, points[0].y);
         for (let index = 1; index < length; index++) {
             const start = points[index - 1];
             const end = points[index];
@@ -147,14 +150,7 @@ export function renderMaterial(
                 const x = start.x + resultOffsetX - options.size / 2;
                 const y = start.y + resultOffsetY - options.size / 2;
 
-                context.save();
-                if (options.material!.repeatMode === 'incompact-size') {
-                    context.translate(x + options.size / 2, y + options.size / 2);
-                    context.rotate(resultAngle);
-                    context.translate(-(x + options.size / 2), -(y + options.size / 2));
-                }
-                context.drawImage(material, x, y, options.size, options.size);
-                context.restore();
+                canvasKitRenderer.render(material, x, y, options.size, options.size);
                 if (!start.rendered) {
                     start.angle.push(resultAngle);
                     start.offsetX.push(resultOffsetX);
@@ -164,4 +160,6 @@ export function renderMaterial(
             start.rendered = true;
         }
     }
+    context.drawImage(tempCanvas, 0, 0, context.canvas.width, context.canvas.height);
+    canvasKitRenderer.destroy();
 }

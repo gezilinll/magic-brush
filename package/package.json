@@ -25,6 +25,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "canvaskit-wasm": "^0.39.1",
         "perfect-freehand": "^1.2.2",
         "simplify-js": "^1.2.4",
         "tinycolor2": "^1.6.0"

@@ -439,7 +439,13 @@
 
 <script setup lang="ts">
 import { throttle } from 'lodash';
-import { BrushPotions, FreehandBrush, InkBrushOptions, MaterialBrushOptions } from 'magic-brush';
+import {
+    BrushPotions,
+    FreehandBrush,
+    initCanvasKit,
+    InkBrushOptions,
+    MaterialBrushOptions,
+} from 'magic-brush';
 import { computed, onMounted, Ref, ref, watch } from 'vue';
 
 declare type BrushElement = { brush: FreehandBrush; initLeft: number; initTop: number };
@@ -458,8 +464,12 @@ const container: Ref<HTMLDivElement | null> = ref(null);
 // Material Brush
 const materialBrushStyles: (MaterialBrushOptions & { src: string })[] = [
     { src: 'mb_style1.png', img: null!, repeatMode: 'compact' },
-    { src: 'mb_style2.png', img: null!, repeatMode: 'compact' },
-    { src: 'mb_style3.png', img: null!, repeatMode: 'compact' },
+    {
+        src: 'black_edge_origin.png',
+        img: null!,
+        repeatMode: 'compact',
+    },
+    { src: 'black_edge_small.png', img: null!, repeatMode: 'compact' },
     { src: 'mb_style4.png', img: null!, repeatMode: 'incompact-fixed' },
     { src: 'mb_style5.png', img: null!, repeatMode: 'incompact-size' },
     { src: 'mb_style6.png', img: null!, repeatMode: 'incompact-size' },
@@ -761,6 +771,7 @@ onMounted(async () => {
     await Promise.all(loadMaterialPromises);
     await Promise.all(loadInkPromises);
     await Promise.all(loadToyPromises);
+    await initCanvasKit();
 
     cancelAnimationFrame(animationId);
     options = getOptions();
